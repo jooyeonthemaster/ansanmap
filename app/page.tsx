@@ -1,103 +1,118 @@
-import Image from "next/image";
+'use client';
+
+import { useState, Suspense, lazy } from 'react';
+import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { initializeSampleData } from '@/lib/sample-data';
+import { Map, Heart, Info, Settings, RefreshCw } from 'lucide-react';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import NetworkStatus from '@/components/ui/NetworkStatus';
+
+// 동적 임포트로 초기 로딩 최적화
+const EnhancedKakaoMap = dynamic(() => import('@/components/EnhancedKakaoMap'), {
+  loading: () => <SkeletonLoader />,
+  ssr: false
+});
+
+const FavoritesPage = lazy(() => import('@/components/FavoritesPage'));
+const InfoPage = lazy(() => import('@/components/InfoPage'));
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'map' | 'favorites' | 'info'>('map');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const handleInitSampleData = () => {
+    initializeSampleData();
+    window.location.reload();
+  };
+
+  const handleBoothSelect = () => {
+    setActiveTab('map');
+  };
+
+  return (
+    <div className="relative w-full">
+      <NetworkStatus />
+      
+      {/* 플로팅 액션 버튼 (개발용) */}
+      {activeTab === 'map' && (
+        <div className="fixed top-16 right-2 z-30 flex flex-col gap-2 max-w-[370px]">
+          <button
+            onClick={handleInitSampleData}
+            className="p-2 bg-green-500 text-white rounded-full shadow-lg hover:bg-green-600 transition-colors group"
+            title="샘플 데이터 초기화"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <RefreshCw className="w-4 h-4 group-hover:animate-spin" />
+          </button>
+          <button
+            onClick={() => router.push('/admin')}
+            className="p-2 bg-gray-700 text-white rounded-full shadow-lg hover:bg-gray-800 transition-colors"
+            title="관리자"
           >
-            Read our docs
-          </a>
+            <Settings className="w-4 h-4" />
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
+
+      {/* 컨텐츠 영역 */}
+      <div className="h-[calc(100svh-3rem-3.5rem)]">
+        {activeTab === 'map' && (
+          <EnhancedKakaoMap />
+        )}
+        
+        {activeTab === 'favorites' && (
+          <Suspense fallback={<SkeletonLoader />}>
+            <FavoritesPage onBoothSelect={handleBoothSelect} />
+          </Suspense>
+        )}
+        
+        {activeTab === 'info' && (
+          <Suspense fallback={<SkeletonLoader />}>
+            <InfoPage />
+          </Suspense>
+        )}
+      </div>
+
+      {/* 하단 네비게이션 */}
+      <div className="fixed left-1/2 bottom-0 z-40 w-[380px] -translate-x-1/2">
+        <div className="h-14 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-t border-black/5 flex items-center justify-around">
+          <button
+            onClick={() => setActiveTab('map')}
+            className={`flex-1 py-2 flex flex-col items-center gap-1 transition-all ${
+              activeTab === 'map' 
+                ? 'text-blue-600 scale-110' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Map className="w-5 h-5" />
+            <span className="text-xs font-medium">지도</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('favorites')}
+            className={`flex-1 py-2 flex flex-col items-center gap-1 transition-all ${
+              activeTab === 'favorites' 
+                ? 'text-blue-600 scale-110' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Heart className={`w-5 h-5 ${activeTab === 'favorites' ? 'fill-current' : ''}`} />
+            <span className="text-xs font-medium">즐겨찾기</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('info')}
+            className={`flex-1 py-2 flex flex-col items-center gap-1 transition-all ${
+              activeTab === 'info' 
+                ? 'text-blue-600 scale-110' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Info className="w-5 h-5" />
+            <span className="text-xs font-medium">정보</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
