@@ -99,7 +99,7 @@ export default function FavoritesPage({ onBoothSelect }: FavoritesPageProps) {
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-2xl">
-                        {boothCategoryConfig[booth.category].icon}
+                        {(boothCategoryConfig[booth.category] || boothCategoryConfig.info).icon}
                       </div>
                       
                       <div className="flex-1">

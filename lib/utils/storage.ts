@@ -76,20 +76,22 @@ export const getAnnouncements = (): Announcement[] => {
   const data = localStorage.getItem(ANNOUNCEMENTS_KEY);
   const announcements = data ? JSON.parse(data) : [];
   
-  // 만료되지 않은 공지사항만 필터링
+  // 만료되지 않은 공지사항만 필터링 (legacy support)
   const now = new Date();
-  return announcements.filter((a: Announcement) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return announcements.filter((a: any) => {
     if (!a.expiresAt) return true;
     return new Date(a.expiresAt) > now;
   });
 };
 
-export const addAnnouncement = (announcement: Omit<Announcement, 'id' | 'createdAt'>): void => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const addAnnouncement = (announcement: any): void => {
   const announcements = getAnnouncements();
   announcements.push({
     ...announcement,
     id: Date.now().toString(),
-    createdAt: new Date().toISOString()
+    created_at: new Date().toISOString()
   });
   localStorage.setItem(ANNOUNCEMENTS_KEY, JSON.stringify(announcements));
 };

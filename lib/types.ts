@@ -1,5 +1,8 @@
 import { BoothCategory } from './booth-config';
 
+// Re-export BoothCategory
+export type { BoothCategory };
+
 // 좌표 타입
 export interface Coordinate {
   lat: number;
@@ -48,13 +51,24 @@ export interface CreateBoothDto {
 }
 
 // 공지사항 타입
+export type AnnouncementPriority = 'low' | 'normal' | 'high' | 'urgent';
+
 export interface Announcement {
   id: string;
   title: string;
   content: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  createdAt: string;
-  expiresAt?: string;
+  priority: AnnouncementPriority;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// 공지사항 생성 DTO
+export interface CreateAnnouncementDto {
+  title: string;
+  content: string;
+  priority?: AnnouncementPriority;
+  is_active?: boolean;
 }
 
 // 사용자 체크인 기록

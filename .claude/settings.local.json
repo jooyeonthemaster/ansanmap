@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx tsx:*)",
+      "Read(//c/Users/jooye/Desktop/20251012aimap/**)",
+      "Bash(cat:*)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

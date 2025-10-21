@@ -1,21 +1,60 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Phone, Trophy, Award, Users, TrendingUp, Activity } from 'lucide-react';
+import { Calendar, MapPin, Phone, Trophy, Award, Activity, Megaphone, AlertCircle, Info } from 'lucide-react';
 import { getTotalPoints, getVisitedBooths, getCheckIns } from '@/lib/utils/storage';
 import { motion } from 'framer-motion';
+import { getActiveAnnouncements } from '@/lib/actions/announcements';
+import { Announcement } from '@/lib/types';
+import { createClient } from '@/lib/supabase/client';
 
 export default function InfoPage() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [visitedCount, setVisitedCount] = useState(0);
   const [checkInCount, setCheckInCount] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeTab, setActiveTab] = useState<'info' | 'stats' | 'rewards'>('info');
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
     setTotalPoints(getTotalPoints());
     setVisitedCount(getVisitedBooths().length);
     setCheckInCount(getCheckIns().length);
+
+    // 공지사항 로드
+    loadAnnouncements();
+
+    // 실시간 구독 설정
+    const supabase = createClient();
+    const channel = supabase
+      .channel('announcements')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'announcements' },
+        () => {
+          loadAnnouncements();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
+  const loadAnnouncements = async () => {
+    const data = await getActiveAnnouncements();
+    setAnnouncements(data);
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'urgent': return <AlertCircle className="w-4 h-4" />;
+      case 'high': return <Megaphone className="w-4 h-4" />;
+      default: return <Info className="w-4 h-4" />;
+    }
+  };
+
 
   const rewards = [
     { points: 50, name: '축제 스티커', claimed: totalPoints >= 50 },
@@ -35,31 +74,61 @@ export default function InfoPage() {
     <div className="h-[calc(100vh-6.5rem)] overflow-y-auto bg-gray-50">
       {/* 헤더 */}
       <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-6">
-        <h1 className="text-2xl font-bold mb-2">안산 사이언스밸리 축제</h1>
-        <p className="text-white/80 text-sm">2024.10.25 - 10.27</p>
-        
-        <div className="grid grid-cols-2 gap-4 mt-6">
-          <div className="bg-white/20 backdrop-blur rounded-lg p-3">
-            <Users className="w-5 h-5 mb-1" />
-            <p className="text-xs opacity-80">현재 방문자</p>
-            <p className="text-lg font-bold">1,234명</p>
-          </div>
-          <div className="bg-white/20 backdrop-blur rounded-lg p-3">
-            <TrendingUp className="w-5 h-5 mb-1" />
-            <p className="text-xs opacity-80">오늘 방문자</p>
-            <p className="text-lg font-bold">5,678명</p>
-          </div>
+        <h1 className="text-2xl font-bold mb-2">한양대 ERICA 축제</h1>
+        <p className="text-white/80 text-sm">2025.11.01 - 11.02</p>
+
+        {/* 실시간 공지사항 */}
+        <div className="mt-6 space-y-2">
+          {announcements.length > 0 ? (
+            announcements.slice(0, 3).map((announcement) => (
+              <motion.div
+                key={announcement.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`backdrop-blur rounded-lg p-3 border ${
+                  announcement.priority === 'urgent'
+                    ? 'bg-red-500/30 border-red-300/50'
+                    : announcement.priority === 'high'
+                    ? 'bg-orange-500/30 border-orange-300/50'
+                    : 'bg-white/20 border-white/30'
+                }`}
+              >
+                <div className="flex items-start gap-2">
+                  <div className="flex-shrink-0 mt-0.5">
+                    {getPriorityIcon(announcement.priority)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold mb-1">{announcement.title}</p>
+                    <p className="text-xs opacity-90 line-clamp-2">{announcement.content}</p>
+                    <p className="text-[10px] opacity-70 mt-1">
+                      {new Date(announcement.created_at).toLocaleString('ko-KR', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <div className="bg-white/20 backdrop-blur rounded-lg p-3 text-center">
+              <Megaphone className="w-5 h-5 mx-auto mb-1 opacity-60" />
+              <p className="text-xs opacity-80">현재 공지사항이 없습니다</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 탭 메뉴 */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      {/* 탭 메뉴 - 숨김 처리 */}
+      {/* <div className="bg-white border-b sticky top-0 z-10">
         <div className="flex">
           <button
             onClick={() => setActiveTab('info')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'info' 
-                ? 'text-blue-600 border-b-2 border-blue-600' 
+              activeTab === 'info'
+                ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-600'
             }`}
           >
@@ -68,8 +137,8 @@ export default function InfoPage() {
           <button
             onClick={() => setActiveTab('stats')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'stats' 
-                ? 'text-blue-600 border-b-2 border-blue-600' 
+              activeTab === 'stats'
+                ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-600'
             }`}
           >
@@ -78,15 +147,15 @@ export default function InfoPage() {
           <button
             onClick={() => setActiveTab('rewards')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'rewards' 
-                ? 'text-blue-600 border-b-2 border-blue-600' 
+              activeTab === 'rewards'
+                ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-600'
             }`}
           >
             리워드
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* 컨텐츠 */}
       <div className="p-4">
@@ -103,16 +172,12 @@ export default function InfoPage() {
               </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">10월 25일 (금)</span>
-                  <span className="font-medium">17:00 - 22:00</span>
+                  <span className="text-gray-600">11월 1일 (토)</span>
+                  <span className="font-medium">10:00 - 17:00</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">10월 26일 (토)</span>
-                  <span className="font-medium">10:00 - 22:00</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">10월 27일 (일)</span>
-                  <span className="font-medium">10:00 - 20:00</span>
+                  <span className="text-gray-600">11월 2일 (일)</span>
+                  <span className="font-medium">10:00 - 17:00</span>
                 </div>
               </div>
             </div>
@@ -123,12 +188,12 @@ export default function InfoPage() {
                 오시는 길
               </h3>
               <p className="text-sm text-gray-600 mb-2">
-                경기도 안산시 상록구 광덕1로 375<br />
-                안산 문화광장
+                경기도 안산시 상록구 한양대학로 55<br />
+                한양대학교 ERICA 캠퍼스
               </p>
               <div className="space-y-1 text-sm">
-                <p><span className="font-medium">지하철:</span> 4호선 한대앞역 2번 출구 도보 10분</p>
-                <p><span className="font-medium">버스:</span> 10, 10-1, 22, 30번</p>
+                <p><span className="font-medium">지하철:</span> 4호선 한대앞역 셔틀버스 이용</p>
+                <p><span className="font-medium">버스:</span> 110, 110-1, 32, 3100번</p>
               </div>
             </div>
 
@@ -138,9 +203,9 @@ export default function InfoPage() {
                 문의
               </h3>
               <div className="space-y-2 text-sm">
-                <p><span className="font-medium">축제 운영본부:</span> 031-123-4567</p>
-                <p><span className="font-medium">의료지원:</span> 031-123-4568</p>
-                <p><span className="font-medium">분실물센터:</span> 031-123-4569</p>
+                <p><span className="font-medium">축제 운영본부:</span> 031-400-5114</p>
+                <p><span className="font-medium">학생지원팀:</span> 031-400-5115</p>
+                <p><span className="font-medium">분실물센터:</span> 031-400-5116</p>
               </div>
             </div>
           </motion.div>

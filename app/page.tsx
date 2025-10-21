@@ -4,7 +4,7 @@ import { useState, Suspense, lazy } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { initializeSampleData } from '@/lib/sample-data';
-import { Map, Heart, Info, Settings, RefreshCw } from 'lucide-react';
+import { Map, Info, Settings, RefreshCw } from 'lucide-react';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import NetworkStatus from '@/components/ui/NetworkStatus';
 
@@ -79,32 +79,33 @@ export default function Home() {
           <button
             onClick={() => setActiveTab('map')}
             className={`flex-1 py-2 flex flex-col items-center gap-1 transition-all ${
-              activeTab === 'map' 
-                ? 'text-blue-600 scale-110' 
+              activeTab === 'map'
+                ? 'text-blue-600 scale-110'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             <Map className="w-5 h-5" />
             <span className="text-xs font-medium">지도</span>
           </button>
-          
-          <button
+
+          {/* 즐겨찾기 버튼 - 숨김 처리 */}
+          {/* <button
             onClick={() => setActiveTab('favorites')}
             className={`flex-1 py-2 flex flex-col items-center gap-1 transition-all ${
-              activeTab === 'favorites' 
-                ? 'text-blue-600 scale-110' 
+              activeTab === 'favorites'
+                ? 'text-blue-600 scale-110'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             <Heart className={`w-5 h-5 ${activeTab === 'favorites' ? 'fill-current' : ''}`} />
             <span className="text-xs font-medium">즐겨찾기</span>
-          </button>
-          
+          </button> */}
+
           <button
             onClick={() => setActiveTab('info')}
             className={`flex-1 py-2 flex flex-col items-center gap-1 transition-all ${
-              activeTab === 'info' 
-                ? 'text-blue-600 scale-110' 
+              activeTab === 'info'
+                ? 'text-blue-600 scale-110'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >

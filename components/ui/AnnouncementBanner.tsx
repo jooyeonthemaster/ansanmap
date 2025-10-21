@@ -14,7 +14,7 @@ export default function AnnouncementBanner() {
   useEffect(() => {
     const loadAnnouncements = () => {
       const loaded = getAnnouncements();
-      const priorityOrder = ['urgent', 'high', 'medium', 'low'];
+      const priorityOrder = ['urgent', 'high', 'normal', 'low'];
       const sorted = loaded.sort((a, b) => 
         priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority)
       );
@@ -54,7 +54,7 @@ export default function AnnouncementBanner() {
     switch (current.priority) {
       case 'urgent': return 'bg-red-500';
       case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-blue-500';
+      case 'normal': return 'bg-blue-500';
       default: return 'bg-gray-600';
     }
   };

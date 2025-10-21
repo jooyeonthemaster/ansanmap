@@ -38,8 +38,8 @@ export default function KakaoMap() {
       window.kakao.maps.load(() => {
         if (!mapContainer.current) return;
 
-        // 안산 문화광장 중심 (축제 장소)
-        const festivalCenter = { lat: 37.3219, lng: 126.8308 };
+        // 한양대 ERICA 캠퍼스 중심
+        const festivalCenter = { lat: 37.2978, lng: 126.8378 };
 
         const options = {
           center: new window.kakao.maps.LatLng(festivalCenter.lat, festivalCenter.lng),
@@ -75,7 +75,7 @@ export default function KakaoMap() {
     booths.forEach(booth => {
       if (!booth.isActive) return;
 
-      const config = boothCategoryConfig[booth.category];
+      const config = boothCategoryConfig[booth.category] || boothCategoryConfig.info;
       
       // 폴리곤 경로 생성
       const polygonPath = booth.coordinates.map(coord => 

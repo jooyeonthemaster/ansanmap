@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { getBooths } from '@/lib/booth-storage';
+import { getBooths, subscribeToBooths } from '@/lib/supabase/booth-api';
 import { Booth } from '@/lib/types';
 import { boothCategoryConfig } from '@/lib/booth-config';
 import SearchAndFilter from './ui/SearchAndFilter';
 import BoothDetail from './ui/BoothDetail';
 import QRCheckIn from './ui/QRCheckIn';
 import AnnouncementBanner from './ui/AnnouncementBanner';
-import { Navigation, QrCode, Layers } from 'lucide-react';
+import { Navigation, QrCode, Layers, Image } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
+import ImageMapViewer from './ui/ImageMapViewer';
+import { AnimatePresence } from 'framer-motion';
 
 import { KakaoMap, KakaoOverlay, KakaoPolygon } from '@/types/kakao';
 
@@ -23,15 +25,16 @@ export default function EnhancedKakaoMap() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
   const [zoomLevel, setZoomLevel] = useState(3); // 줌 레벨 상태 추가
+  const [showImageMap, setShowImageMap] = useState(false); // 이미지 지도 표시 상태
   const overlaysRef = useRef<KakaoOverlay[]>([]);
   const polygonsRef = useRef<KakaoPolygon[]>([]);
   const userMarkerRef = useRef<KakaoOverlay | null>(null);
 
   // 부스 데이터 로드 및 실시간 업데이트
   useEffect(() => {
-    const loadBooths = () => {
-      const loadedBooths = getBooths();
-      // 시뮬레이션: 랜덤 혼잡도 및 대기시간 추가
+    const loadBooths = async () => {
+      const loadedBooths = await getBooths();
+      // 시뮬레이션: 랜덤 혼잡도 및 대기시간 추가 (DB에 없는 경우)
       const enhancedBooths = loadedBooths.map((booth, index) => ({
         ...booth,
         congestionLevel: booth.congestionLevel || (['low', 'medium', 'high', 'very-high'] as const)[Math.floor(Math.random() * 4)],
@@ -39,18 +42,33 @@ export default function EnhancedKakaoMap() {
         currentVisitors: booth.currentVisitors ?? Math.floor(Math.random() * 50),
         maxCapacity: booth.maxCapacity || 50,
         popularityScore: booth.popularityScore ?? (Math.random() * 5),
-        // webcamUrl을 이미 설정된 값 유지 또는 특정 부스에만 설정
         webcamUrl: booth.webcamUrl || (index % 2 === 0 ? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' : undefined),
-        tags: booth.tags || ['축제', '안산', '2024']
+        tags: booth.tags || ['축제', '한양대', 'ERICA', '2025']
       }));
       setBooths(enhancedBooths);
       setFilteredBooths(enhancedBooths);
     };
 
     loadBooths();
-    const interval = setInterval(loadBooths, 10000); // 10초마다 업데이트
-    
-    return () => clearInterval(interval);
+
+    // Realtime 구독 (Supabase에서 부스 변경 시 자동 업데이트)
+    const unsubscribe = subscribeToBooths((updatedBooths) => {
+      const enhancedBooths = updatedBooths.map((booth, index) => ({
+        ...booth,
+        congestionLevel: booth.congestionLevel || (['low', 'medium', 'high', 'very-high'] as const)[Math.floor(Math.random() * 4)],
+        waitingTime: booth.waitingTime ?? Math.floor(Math.random() * 30),
+        currentVisitors: booth.currentVisitors ?? Math.floor(Math.random() * 50),
+        maxCapacity: booth.maxCapacity || 50,
+        popularityScore: booth.popularityScore ?? (Math.random() * 5),
+        webcamUrl: booth.webcamUrl || (index % 2 === 0 ? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' : undefined),
+        tags: booth.tags || ['축제', '한양대', 'ERICA', '2025']
+      }));
+      setBooths(enhancedBooths);
+      setFilteredBooths(enhancedBooths);
+      toast.success('부스 정보가 업데이트되었습니다!');
+    });
+
+    return () => unsubscribe();
   }, []);
 
   // 카카오맵 초기화
@@ -64,7 +82,8 @@ export default function EnhancedKakaoMap() {
       window.kakao.maps.load(() => {
         if (!mapContainer.current) return;
 
-        const festivalCenter = { lat: 37.3219, lng: 126.8308 };
+        // 한양대 ERICA 캠퍼스 중심
+        const festivalCenter = { lat: 37.2978, lng: 126.8378 };
         
         const options = {
           center: new window.kakao.maps.LatLng(festivalCenter.lat, festivalCenter.lng),
@@ -164,11 +183,11 @@ export default function EnhancedKakaoMap() {
     
     // 줌 레벨에 따른 오버레이 크기 및 표시 여부 결정
     const getOverlaySettings = (zoomLevel: number) => {
-      if (zoomLevel <= 2) return { scale: 1, fontSize: 11, iconSize: 16, padding: '6px 10px', show: true };
-      if (zoomLevel === 3) return { scale: 0.9, fontSize: 10, iconSize: 14, padding: '5px 8px', show: true };
-      if (zoomLevel === 4) return { scale: 0.75, fontSize: 9, iconSize: 12, padding: '4px 7px', show: true };
-      if (zoomLevel === 5) return { scale: 0.6, fontSize: 8, iconSize: 10, padding: '3px 6px', show: true };
-      if (zoomLevel >= 6) return { scale: 0.5, fontSize: 7, iconSize: 8, padding: '2px 5px', show: false }; // 너무 줄어들면 숨김
+      if (zoomLevel <= 2) return { scale: 1, fontSize: 11, iconSize: 16, paddingY: 6, paddingX: 10, show: true };
+      if (zoomLevel === 3) return { scale: 0.9, fontSize: 10, iconSize: 14, paddingY: 5, paddingX: 8, show: true };
+      if (zoomLevel === 4) return { scale: 0.75, fontSize: 9, iconSize: 12, paddingY: 4, paddingX: 7, show: true };
+      if (zoomLevel === 5) return { scale: 0.6, fontSize: 8, iconSize: 10, paddingY: 3, paddingX: 6, show: true };
+      if (zoomLevel >= 6) return { scale: 0.5, fontSize: 7, iconSize: 8, paddingY: 2, paddingX: 5, show: false }; // 너무 줄어들면 숨김
     };
 
     const overlaySettings = getOverlaySettings(currentZoomLevel);
@@ -177,13 +196,13 @@ export default function EnhancedKakaoMap() {
     filteredBooths.forEach(booth => {
       if (!booth.isActive) return;
 
-      const config = boothCategoryConfig[booth.category];
-      
+      const config = boothCategoryConfig[booth.category] || boothCategoryConfig.info;
+
       // 혼잡도에 따른 색상 조정
-      const fillOpacity = booth.congestionLevel === 'very-high' ? 0.7 : 
-                          booth.congestionLevel === 'high' ? 0.5 : 
+      const fillOpacity = booth.congestionLevel === 'very-high' ? 0.7 :
+                          booth.congestionLevel === 'high' ? 0.5 :
                           booth.congestionLevel === 'medium' ? 0.4 : 0.3;
-      
+
       const strokeColor = booth.congestionLevel === 'very-high' ? '#EF4444' :
                          booth.congestionLevel === 'high' ? '#F97316' :
                          booth.congestionLevel === 'medium' ? '#EAB308' :
@@ -238,29 +257,28 @@ export default function EnhancedKakaoMap() {
                         booth.congestionLevel === 'medium' ? '#CA8A04' :
                         'white'};
           color: ${booth.congestionLevel ? 'white' : 'black'};
-          border: 2px solid ${strokeColor};
-          border-radius: ${8 * overlaySettings.scale}px;
-          padding: ${overlaySettings.padding};
+          border: 1.5px solid ${strokeColor};
+          border-radius: ${6 * overlaySettings.scale}px;
+          padding: ${overlaySettings.paddingY}px ${overlaySettings.paddingX}px;
           font-size: ${overlaySettings.fontSize}px;
           font-weight: bold;
-          box-shadow: 0 ${4 * overlaySettings.scale}px ${12 * overlaySettings.scale}px rgba(0,0,0,0.15);
+          box-shadow: 0 ${2 * overlaySettings.scale}px ${6 * overlaySettings.scale}px rgba(0,0,0,0.15);
           display: flex;
           align-items: center;
-          gap: ${4 * overlaySettings.scale}px;
-          backdrop-filter: blur(8px);
-          background: ${booth.congestionLevel ? 
-            `linear-gradient(135deg, ${strokeColor}CC, ${strokeColor}99)` : 
-            'rgba(255,255,255,0.95)'};
+          justify-content: center;
+          gap: ${2 * overlaySettings.scale}px;
+          backdrop-filter: blur(4px);
+          background: ${booth.congestionLevel ?
+            `linear-gradient(135deg, ${strokeColor}DD, ${strokeColor}AA)` :
+            'rgba(255,255,255,0.92)'};
           cursor: pointer;
           transition: transform 0.2s, box-shadow 0.2s;
           transform: scale(${overlaySettings.scale});
+          min-width: ${overlaySettings.fontSize * 1.8}px;
         "
         onmouseover="this.style.transform='scale(${overlaySettings.scale * 1.1})'; this.style.boxShadow='0 ${6 * overlaySettings.scale}px ${20 * overlaySettings.scale}px rgba(0,0,0,0.25)';"
         onmouseout="this.style.transform='scale(${overlaySettings.scale})'; this.style.boxShadow='0 ${4 * overlaySettings.scale}px ${12 * overlaySettings.scale}px rgba(0,0,0,0.15)';">
-          <span style="font-size: ${overlaySettings.iconSize}px;">${config.icon}</span>
-          <span>${booth.name}</span>
-          ${booth.waitingTime && booth.waitingTime > 0 && currentZoomLevel <= 4 ? 
-            `<span style="font-size: ${overlaySettings.fontSize - 1}px; opacity: 0.9;">⏱${booth.waitingTime}분</span>` : ''}
+          <span style="font-size: ${overlaySettings.fontSize * 0.85}px; font-weight: 700;">${booth.name.split(' - ')[0] || booth.name.substring(0, 3)}</span>
         </div>
       `;
 
@@ -369,7 +387,7 @@ export default function EnhancedKakaoMap() {
           >
             <Navigation className="w-5 h-5 text-blue-500" />
           </button>
-          
+
           <button
             onClick={toggleMapType}
             className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
@@ -377,7 +395,17 @@ export default function EnhancedKakaoMap() {
           >
             <Layers className="w-5 h-5 text-gray-700" />
           </button>
-          
+
+          <button
+            onClick={() => setShowImageMap(true)}
+            className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
+            title="지도 이미지로 보기"
+            aria-label="지도 이미지로 보기"
+          >
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
+            <Image className="w-5 h-5 text-purple-500" aria-hidden="true" />
+          </button>
+
           <button
             onClick={() => setShowQRCheckIn(true)}
             className="p-3 bg-blue-500 rounded-full shadow-lg hover:shadow-xl transition-shadow"
@@ -422,12 +450,19 @@ export default function EnhancedKakaoMap() {
       
       {/* QR 체크인 */}
       {showQRCheckIn && (
-        <QRCheckIn 
+        <QRCheckIn
           boothId={selectedBooth?.id || 'default'}
           boothName={selectedBooth?.name || '축제 부스'}
           onClose={() => setShowQRCheckIn(false)}
         />
       )}
+
+      {/* 지도 이미지 뷰어 */}
+      <AnimatePresence>
+        {showImageMap && (
+          <ImageMapViewer onClose={() => setShowImageMap(false)} />
+        )}
+      </AnimatePresence>
     </>
   );
 }

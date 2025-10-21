@@ -1,0 +1,510 @@
+{
+  "festivalInfo": {
+    "name": "2025 안산사이언스밸리(ASV) 디지털 교육 & 88로봇위크 과학축제",
+    "dates": "2025년 11월 1일(토) ~ 11월 2일(일)",
+    "location": "한양대 ERICA 캠퍼스",
+    "website": "http://www.asv2025.com/"
+  },
+  "zones": {
+    "advanceZone": {
+      "name": "Advance Zone",
+      "theme": "발전하는 과학",
+      "booths": [
+        {
+          "boothNumber": "A1",
+          "programName": "AI바둑로봇 체험",
+          "organization": "한양대학교 ERICA캠퍼스 로봇직업교육센터"
+        },
+        {
+          "boothNumber": "A2",
+          "programName": "휴머노이드 조종 미션",
+          "organization": "한양대학교 ERICA캠퍼스 로봇직업교육센터"
+        },
+        {
+          "boothNumber": "A3",
+          "programName": "랜덤스틱잡기로봇 체험",
+          "organization": "한양대학교 ERICA캠퍼스 로봇직업교육센터"
+        },
+        {
+          "boothNumber": "A4",
+          "programName": "코딩로봇 게임체험",
+          "organization": "한양대학교 ERICA캠퍼스 로봇직업교육센터"
+        },
+        {
+          "boothNumber": "A5",
+          "programName": "케이팝 로봇 헌터스",
+          "organization": "한양대학교 ERICA캠퍼스 지능형로봇사업단"
+        },
+        {
+          "boothNumber": "A6",
+          "programName": "호로록 라면 로봇",
+          "organization": "한양대학교 ERICA캠퍼스 지능형로봇사업단"
+        },
+        {
+          "boothNumber": "A7",
+          "programName": "즐거운 AI로봇 조종 체험",
+          "organization": "한양대학교 ERICA캠퍼스 지능형로봇사업단"
+        },
+        {
+          "boothNumber": "A8",
+          "programName": "AR체험",
+          "organization": "한양대학교 ERICA캠퍼스 지능형로봇사업단"
+        },
+        {
+          "boothNumber": "A9",
+          "programName": "로봇 엔터테인먼트 체험",
+          "organization": "한양대학교 ERICA캠퍼스 지능형로봇사업단"
+        },
+        {
+          "boothNumber": "A10",
+          "programName": "ASV 그것이 알고싶다",
+          "organization": "ASV협의회"
+        },
+        {
+          "boothNumber": "A11",
+          "programName": "페이퍼크래프트 체험",
+          "organization": "경기테크노파크"
+        },
+        {
+          "boothNumber": "A12",
+          "programName": "하이브리드 강아지로봇 만들기",
+          "organization": "한국생산기술연구원"
+        },
+        {
+          "boothNumber": "A13",
+          "programName": "정밀 측정 실습",
+          "organization": "한국산업기술시험원"
+        },
+        {
+          "boothNumber": "A14",
+          "programName": "재미있는 화학교실 - 사각 거울 만들기",
+          "organization": "한양대학교ERICA 기초과학교육센터 & 대한화학회"
+        },
+        {
+          "boothNumber": "A15",
+          "programName": "재미있는 화학교실 - 형광 캡슐 만들기",
+          "organization": "한양대학교ERICA 기초과학교육센터 & 대한화학회"
+        },
+        {
+          "boothNumber": "A16",
+          "programName": "재미있는 화학교실 - 나만의 은거울 만들기",
+          "organization": "한양대학교ERICA 기초과학교육센터 & 대한화학회"
+        },
+        {
+          "boothNumber": "A17",
+          "programName": "재미있는 화학교실 - 바닷 속 배 띄우기",
+          "organization": "한양대학교ERICA 기초과학교육센터 & 대한화학회"
+        },
+        {
+          "boothNumber": "A18",
+          "programName": "레츠고 AI 챌린지",
+          "organization": "한양대학교 ERICA_ SW중심대학사업단"
+        },
+        {
+          "boothNumber": "A19",
+          "programName": "A.S.V 창의로봇교육",
+          "organization": "한양대학교 ERICA 지능형로봇사업단 K-하이테크플랫폼"
+        },
+        {
+          "boothNumber": "A20",
+          "programName": "토토카 자율주행차 & 전기회로 부채 만들기",
+          "organization": "한국전기연구원"
+        },
+        {
+          "boothNumber": "A21",
+          "programName": "3D 프린터 체험",
+          "organization": "고려대학교 안산병원"
+        },
+        {
+          "boothNumber": "A22",
+          "programName": "다양한 미생물 관찰",
+          "organization": "고려대학교 안산병원 &경안고등학교 GUT바속촉 &상록청소년수련관"
+        },
+        {
+          "boothNumber": "A23",
+          "programName": "탄소중립 커피박 씨드밤 만들기",
+          "organization": "안산환경재단 &안산강서고등학교'가이스트'&상록청소년수련관"
+        },
+        {
+          "boothNumber": "A24",
+          "programName": "기체 온도계 만들기",
+          "organization": "부곡고등학교'지속가능한 우리지역 창업 프로젝트'&안산인재육성재단& 상록청소년수련관"
+        },
+        {
+          "boothNumber": "A25",
+          "programName": "라인트레이서 자동차 만들기",
+          "organization": "㈜택트레이서&본오중학교'헬로코봇' &상록청소년수련관"
+        }
+      ]
+    },
+    "shineZone": {
+      "name": "Shine Zone",
+      "theme": "빛나는 과학 & 디지털교육",
+      "booths": [
+        {
+          "boothNumber": "S11",
+          "programName": "플라스틱 리사이클 태양광 스피커 (태양관 전자판을 이용한 신재생 에너지 생산과정 이해하기)",
+          "organization": "경안고등학교"
+        },
+        {
+          "boothNumber": "S12",
+          "programName": "비커 안에 태양이 떠올랐다! (물과 기름이 섞이지 않는 원리를 이용한 실험)",
+          "organization": "경안고등학교"
+        },
+        {
+          "boothNumber": "S13",
+          "programName": "SDGs 환경 유리컵 커스터마이징 (지속가능발전목표에 대한 설명을 듣고 중요한 목표를 유리컵에 전사)",
+          "organization": "안산국제비즈니스고등학교"
+        },
+        {
+          "boothNumber": "S14",
+          "programName": "업사이클링 펫 자동급식기 (엔트리 블록 코딩을 활용한 자동급식기 만들기)",
+          "organization": "안산해양중학교"
+        },
+        {
+          "boothNumber": "S15",
+          "programName": "뉴턴의 진자 (뉴턴의 운동법칙과 에너지 보존 원리 실험)",
+          "organization": "안산해양중학교"
+        },
+        {
+          "boothNumber": "S16",
+          "programName": "태양계 팔찌로 배우는 우주 (각 행성의 특징을 배우고 자외선 성질을 관찰)",
+          "organization": "동산고"
+        },
+        {
+          "boothNumber": "S17",
+          "programName": "21세기 호롱 (열전자소자와 적정기술이 실생활에 활용되는 원리)",
+          "organization": "동산고"
+        },
+        {
+          "boothNumber": "S18",
+          "programName": "레고스파이크로 안전 금고 만들기 (코딩 프로그램)",
+          "organization": "안산중앙초등학교"
+        },
+        {
+          "boothNumber": "S19",
+          "programName": "돌아라, 무한 자석 팽이! (자기 반발력 원리 이용한 자석 팽이 자기부상 현상체험)",
+          "organization": "선부초등학교"
+        },
+        {
+          "boothNumber": "S20",
+          "programName": "나만의 꿈 시계 (STEAM요소를 적용하여 시계를 해부하고 시계의 작동원리 이해)",
+          "organization": "단대초등학교"
+        },
+        {
+          "boothNumber": "S21",
+          "programName": "이항분포기 만들기 (이항분포를 직접체험하고 이항분포가 정규분호에 근사되는 과정을 체험)",
+          "organization": "신한고등학교"
+        },
+        {
+          "boothNumber": "S22",
+          "programName": "입체도형으로 연필꽂이 만들기 (다면체에 대해 알아보고 준정다면체 중 정팔면체의 모양을 이용한 연필꽂이 만들기)",
+          "organization": "신한고등학교"
+        },
+        {
+          "boothNumber": "S23",
+          "programName": "내 손안의 작은 발전소 (자석을 이용한 전기의 발생 원리 관찰) 운동에너지가 전기에너지로 바뀌는 과정",
+          "organization": "신한고등학교"
+        },
+        {
+          "boothNumber": "S24",
+          "programName": "달리는 전기 자석 기차 (자기장과 전기장을 이용하여 전자기유도에 대한 체험)",
+          "organization": "우성고등학교"
+        },
+        {
+          "boothNumber": "S25",
+          "programName": "상상 그 이상 (자이로스코프 원리 체험)",
+          "organization": "소명여자고등학교"
+        }
+      ]
+    },
+    "viewZone": {
+      "name": "View Zone",
+      "theme": "과학의 관점",
+      "booths": [
+        {
+          "boothNumber": "V1",
+          "programName": "(안산시생활과학교실)창의융합캠프",
+          "organization": "상록청소년수련관(대덕과학관)"
+        },
+        {
+          "boothNumber": "V2",
+          "programName": "모션 시뮬레이터 (트럭)",
+          "organization": "알크레프트"
+        },
+        {
+          "boothNumber": "V3",
+          "programName": "탑승형로봇",
+          "organization": "케이앤에스 아트 컴퍼니"
+        },
+        {
+          "boothNumber": "V4",
+          "programName": "과학원리 속 하늘그네",
+          "organization": "케이앤에스 아트 컴퍼니 / 와바다다"
+        },
+        {
+          "boothNumber": "V5",
+          "programName": "AI 포토존",
+          "organization": "케이앤에스 아트 컴퍼니 / 일해라 컴퍼니"
+        },
+        {
+          "boothNumber": "V6",
+          "programName": "AI 화가로봇",
+          "organization": "미니로봇"
+        },
+        {
+          "boothNumber": "V7",
+          "programName": "AR피구",
+          "organization": "케이앤에스 아트 컴퍼니 / 하도"
+        },
+        {
+          "boothNumber": "V8",
+          "programName": "방탈출 버스",
+          "organization": "서울시립과학관"
+        },
+        {
+          "boothNumber": "V9",
+          "programName": "XR버스",
+          "organization": "㈜엘콤"
+        },
+        {
+          "boothNumber": "V10",
+          "programName": "과학토크콘서트 (장동선 뇌과학자, 한재권교수)",
+          "organization": "차세대융합기술연구원 한양대학교 ERICA캠퍼스 지능형로봇사업단"
+        },
+        {
+          "boothNumber": "V11",
+          "programName": "과학마술공연(계면활성제 아저씨 및 코딩마술)",
+          "organization": "상록청소년수련관 대덕과학관 로보웍스"
+        },
+        {
+          "boothNumber": "V12",
+          "programName": "버스킹 공연(경인고속도로, 최항석과 부기몬스터 등)",
+          "organization": "케이앤에스 아트 컴퍼니"
+        }
+      ]
+    },
+    "futureScienceZone": {
+      "name": "Future Science Zone",
+      "theme": "2025 주제존",
+      "booths": [
+        {
+          "boothNumber": "(공연)",
+          "programName": "타이탄 공연",
+          "organization": "사이언스팀(주)"
+        },
+        {
+          "boothNumber": "G1",
+          "programName": "공연",
+          "organization": "주식회사 로아스"
+        },
+        {
+          "boothNumber": "F1",
+          "programName": "대학생스포츠서포터즈 청활100 증강현실 스마트놀이터",
+          "organization": "단원청소년수련관"
+        },
+        {
+          "boothNumber": "F2",
+          "programName": "High, Drone!",
+          "organization": "단원청소년수련관"
+        },
+        {
+          "boothNumber": "F3",
+          "programName": "AI 바둑 로봇을 이겨라!",
+          "organization": "안산청소년문화의집"
+        },
+        {
+          "boothNumber": "F4",
+          "programName": "아세널과 함께하는 아트체험",
+          "organization": "사동청소년문화의집"
+        },
+        {
+          "boothNumber": "F5",
+          "programName": "빛의 실험실-LED 무드등 제작소",
+          "organization": "안산시진로체험지원센터"
+        },
+        {
+          "boothNumber": "F6",
+          "programName": "밸런스 보드",
+          "organization": "상록청소년수련관 대덕과학관"
+        },
+        {
+          "boothNumber": "F7",
+          "programName": "네모난 비눗방울",
+          "organization": "상록청소년수련관 '안산시생활과학교실'"
+        },
+        {
+          "boothNumber": "F8",
+          "programName": "이진수 키링 만들기",
+          "organization": "상록청소년수련관 '안산시생활과학교실'"
+        },
+        {
+          "boothNumber": "F9",
+          "programName": "페트병 망원경 만들기 & 흑점 관찰",
+          "organization": "상록청소년수련관 '안산시생활과학교실'"
+        },
+        {
+          "boothNumber": "F10",
+          "programName": "플라잉 건",
+          "organization": "상록청소년수련관 '안산시생활과학교실'"
+        },
+        {
+          "boothNumber": "F11",
+          "programName": "소리를 빛으로 보는 전구",
+          "organization": "상록청소년수련관 '안산시생활과학교실''"
+        },
+        {
+          "boothNumber": "F12",
+          "programName": "땅과 바다를 헤엄치는 울산 범고래",
+          "organization": "울산대학교"
+        },
+        {
+          "boothNumber": "F13",
+          "programName": "태양열 자동차",
+          "organization": "이화여자대학교"
+        },
+        {
+          "boothNumber": "F14",
+          "programName": "로보로보와 함께하는 미래기술체험",
+          "organization": "㈜로보로보"
+        },
+        {
+          "boothNumber": "F15",
+          "programName": "Eco AI: 로봇과 함께하는 지구 지키기 모험",
+          "organization": "해오름 사회적협동조합"
+        },
+        {
+          "boothNumber": "F16",
+          "programName": "AI체험부스 운영",
+          "organization": "뤼튼"
+        },
+        {
+          "boothNumber": "F17",
+          "programName": "싸이팝(Sci-POP) 체험 전시",
+          "organization": "국립과천과학관"
+        },
+        {
+          "boothNumber": "F18",
+          "programName": "드론시뮬레이터 체험",
+          "organization": "㈜플라이존드론"
+        },
+        {
+          "boothNumber": "F19",
+          "programName": "드론 전시",
+          "organization": "㈜플라이존드론"
+        },
+        {
+          "boothNumber": "F20",
+          "programName": "팝드론 체험",
+          "organization": "㈜플라이존드론"
+        },
+        {
+          "boothNumber": "F21",
+          "programName": "놀라운 수중드론의 세계",
+          "organization": "볼시스"
+        },
+        {
+          "boothNumber": "F22",
+          "programName": "넥스트 그린 환경 교육",
+          "organization": "BMW코리아 미래재단"
+        },
+        {
+          "boothNumber": "F23",
+          "programName": "내 손안의 게임공장 나만의 게임 만들기",
+          "organization": "케빈샘코딩전문학원"
+        },
+        {
+          "boothNumber": "F24",
+          "programName": "자석의 힘으로 붕붕~!! 자기부상열차 만들기",
+          "organization": "한국공학한림원 &상록청소년수련관(대덕과학관)"
+        },
+        {
+          "boothNumber": "F25",
+          "programName": "어두운 곳을 밝혀주는 조명등 - 아크릴 무드등 만들기",
+          "organization": "대덕전자(주) &상록청소년수련관(대덕과학관)"
+        },
+        {
+          "boothNumber": "F26",
+          "programName": "격돌!탱크로봇 서바이벌",
+          "organization": "시립노원청소년미래진로센터 앤드"
+        },
+        {
+          "boothNumber": "F27",
+          "programName": "내 친구 알파미니",
+          "organization": "시립노원청소년미래진로센터 앤드"
+        },
+        {
+          "boothNumber": "F28",
+          "programName": "애벌레야 놀러가자",
+          "organization": "와동희망마을만들기협의회"
+        },
+        {
+          "boothNumber": "F29",
+          "programName": "3D문제해결과 AI퀴즈를 풀어 진로 열쇠 획득",
+          "organization": "데이터킹"
+        },
+        {
+          "boothNumber": "F30",
+          "programName": "실내에서 다양한 스포츠를 루디쿤과 함께",
+          "organization": "아이콩"
+        },
+        {
+          "boothNumber": "F31",
+          "programName": "기상기후 놀이터",
+          "organization": "한국생산성본부"
+        },
+        {
+          "boothNumber": "F32",
+          "programName": "섬유 속 숨은 과학찾기",
+          "organization": "한국섬유소재연구원"
+        },
+        {
+          "boothNumber": "F33",
+          "programName": "내셔널 지오그래픽과 함께 지구촌 체험",
+          "organization": "내셔널지오그래픽"
+        },
+        {
+          "boothNumber": "F34",
+          "programName": "GOGO씽! 고카트",
+          "organization": "상록청소년수련관 대덕과학관"
+        },
+        {
+          "boothNumber": "데이터센터",
+          "programName": "쇼미더 IT",
+          "organization": "카카오"
+        },
+        {
+          "boothNumber": "민주광장",
+          "programName": "서동호 작가 별을 유랑하는 나그네의 다서번째 보고서 – 별을 찾아 떠나는 여행",
+          "organization": "서동호 작가"
+        }
+      ]
+    },
+    "robotWeek88": {
+      "name": "88로봇위크",
+      "location": "제1학술관",
+      "programs": [
+        {
+          "programName": "로봇특강",
+          "description": "참여대학과 협력하여 학부모, 일반인, 재학생 대상으로 토요일 2회, 일요일 3회 로봇 강연",
+          "location": "제1학술관 (1F)"
+        },
+        {
+          "programName": "로봇교육",
+          "description": "문제해결형 AI, 자율주행 AI 등 청소년 로봇교육 (오전반/오후반 구분, 토/일 2일간 운영)",
+          "location": "제1학술관 (2F, 3F)"
+        },
+        {
+          "programName": "차세대 아이디어 공모전",
+          "description": "참여대학과 협력하여 전국 초·중·고학생 및 일반인을 대상으로 로봇 아이디어 공모전 전시 (공모전 주제 : 내 지역의 문제를 찾아서-25년 1월부터 현재까지)",
+          "location": "제1과학기술관과 제1학술관 사이 통로 (전시공간)"
+        },
+        {
+          "programName": "대학생 해커톤",
+          "description": "한양대 이공계/비이공계 재학생을 대상으로 총학생회와 COSS 서포터즈가 직접 운영하는 무박 2일 로봇 해커톤",
+          "location": "라이언스홀, 제1학술관"
+        }
+      ]
+    }
+  }
+}

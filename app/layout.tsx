@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "안산 축제 지도 | 실시간 부스 정보",
-  description: "안산 사이언스밸리 축제 - 실시간 부스 위치, 혼잡도, 라이브 영상",
-  keywords: "안산축제, 사이언스밸리, 축제지도, 부스위치, 실시간정보",
+  title: "한양대 ERICA 축제 지도 | 실시간 부스 정보",
+  description: "한양대 ERICA 캠퍼스 축제 - 실시간 부스 위치, 혼잡도, 라이브 영상",
+  keywords: "한양대축제, ERICA, 축제지도, 부스위치, 실시간정보",
   openGraph: {
-    title: "안산 축제 지도",
+    title: "한양대 ERICA 축제 지도",
     description: "실시간 부스 정보와 혼잡도를 확인하세요",
     type: "website",
   },
@@ -39,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="theme-color" content="#ffffff" />
@@ -52,7 +53,7 @@ export default function RootLayout({
             <div className="h-12 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-black/5 flex items-center justify-center">
               <div className="flex items-center gap-2">
                 <span className="text-lg">🎪</span>
-                <span className="font-medium">안산 사이언스밸리 축제</span>
+                <span className="font-medium">한양대 ERICA 축제</span>
               </div>
             </div>
           </div>
