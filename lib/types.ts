@@ -84,3 +84,53 @@ export interface Favorite {
   addedAt: string;
   notificationEnabled: boolean;
 }
+
+// ============================================
+// 메시지 시스템 타입
+// ============================================
+
+// 채팅방 타입
+export type RoomType = 'general' | 'complaint';
+export type RoomStatus = 'active' | 'closed';
+
+// 발신자 타입
+export type SenderType = 'user' | 'admin';
+
+// 채팅방 인터페이스
+export interface ChatRoom {
+  id: string;
+  user_device_id: string;
+  user_name: string;
+  room_type: RoomType;
+  status: RoomStatus;
+  last_message: string | null;
+  last_message_at: string | null;
+  unread_count: number;
+  is_important: boolean; // 중요 채팅방 표시
+  created_at: string;
+  updated_at: string;
+}
+
+// 메시지 인터페이스
+export interface Message {
+  id: string;
+  room_id: string;
+  sender_type: SenderType;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+// 채팅방 생성 DTO
+export interface CreateChatRoomDto {
+  user_device_id: string;
+  user_name?: string;
+  room_type: RoomType;
+}
+
+// 메시지 생성 DTO
+export interface CreateMessageDto {
+  room_id: string;
+  sender_type: SenderType;
+  content: string;
+}

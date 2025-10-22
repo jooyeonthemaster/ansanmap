@@ -7,12 +7,13 @@ import { Booth, CreateBoothDto } from '@/lib/types';
 import { boothCategoryConfig, BoothCategory } from '@/lib/booth-config';
 import AdminMap from '@/components/AdminMap';
 import AnnouncementManager from '@/components/AnnouncementManager';
+import AdminChatManager from '@/components/AdminChatManager';
 import toast from 'react-hot-toast';
 import festivalData from '@/asv-festival-2025.json';
 
 export default function AdminPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'booths' | 'announcements'>('booths');
+  const [activeTab, setActiveTab] = useState<'booths' | 'announcements' | 'messages'>('booths');
   const [booths, setBooths] = useState<Booth[]>([]);
   const [isAddingBooth, setIsAddingBooth] = useState(false);
   const [editingBoothId, setEditingBoothId] = useState<string | null>(null);
@@ -439,235 +440,168 @@ export default function AdminPage() {
     );
   }
   return (
-    <div className="min-h-[calc(100svh-3rem-3.5rem)] bg-gray-50">
-      {/* 헤더 */}
-      <div className="bg-white border-b">
-        <div className="px-4 py-3 flex justify-between items-center">
-          <h1 className="text-lg font-bold">관리자 페이지</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* 헤더 - PC 반응형 */}
+      <div className="bg-white border-b sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <h1 className="text-xl font-bold">관리자 페이지</h1>
           <button
             onClick={() => router.push('/')}
-            className="text-sm text-blue-600"
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
-            ← 지도
+            ← 사용자 화면으로
           </button>
         </div>
 
-        {/* 탭 메뉴 */}
-        <div className="flex border-t">
-          <button
-            onClick={() => setActiveTab('booths')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'booths'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600'
-            }`}
-          >
-            부스 관리
-          </button>
-          <button
-            onClick={() => setActiveTab('announcements')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'announcements'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600'
-            }`}
-          >
-            공지사항 관리
-          </button>
-        </div>
-      </div>
-
-      {/* 탭 컨텐츠 */}
-      {activeTab === 'announcements' ? (
-        <AnnouncementManager />
-      ) : (
-        <>
-      {/* 부스 관리 지도 */}
-      <div className="h-[40vh] relative">
-        <AdminMap
-          onCoordinateSelect={() => {}}
-          selectedCoordinates={[]}
-          booths={booths}
-          isAddingMode={false}
-          onDeleteBooth={handleDeleteBooth}
-          onEditBooth={handleEditBooth}
-        />
-      </div>
-
-      {/* 부스 추가 버튼 */}
-      <div className="p-4">
-        <button
-          onClick={() => setShowMap(true)}
-          className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium"
-        >
-          📍 지도에서 부스 등록하기
-        </button>
-      </div>
-
-      {/* 부스 추가/수정 폼 */}
-      {isAddingBooth && (
-        <div className="p-4 bg-white">
-          <h3 className="font-bold mb-3">{editingBoothId ? '부스 정보 수정' : '새 부스 정보'}</h3>
-
-          <div className="space-y-3">
-            {!editingBoothId && (
-              <button
-                onClick={() => setShowBoothList(true)}
-                className="w-full py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 font-medium"
-              >
-                📋 축제 부스 목록에서 선택
-              </button>
-            )}
-
-            <input
-              type="text"
-              placeholder="부스 이름"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg"
-            />
-            
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({...formData, category: e.target.value as BoothCategory})}
-              className="w-full px-3 py-2 border rounded-lg"
-            >
-              {Object.entries(boothCategoryConfig).map(([key, config]) => (
-                <option key={key} value={key}>
-                  {config.icon} {config.name}
-                </option>
-              ))}
-            </select>
-            
-            <textarea
-              placeholder="부스 설명"
-              value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg h-20"
-            />
-            <input
-              type="text"
-              placeholder="운영 시간 (예: 10:00 - 22:00)"
-              value={formData.operatingHours}
-              onChange={(e) => setFormData({...formData, operatingHours: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg"
-            />
-            
-            <input
-              type="text"
-              placeholder="연락처 (선택)"
-              value={formData.contact}
-              onChange={(e) => setFormData({...formData, contact: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg"
-            />
-            
-            <input
-              type="text"
-              placeholder="가격 정보 (선택)"
-              value={formData.price}
-              onChange={(e) => setFormData({...formData, price: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg"
-            />
-            
+        {/* 탭 메뉴 - PC 반응형 */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex border-t">
             <button
-              onClick={() => setShowMap(true)}
-              className="w-full py-3 bg-gray-100 border border-gray-300 rounded-lg"
+              onClick={() => setActiveTab('booths')}
+              className={`flex-1 sm:flex-initial sm:px-8 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'booths'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
-              {selectedCoordinates.length > 0 
-                ? `✅ 영역 설정됨 (${selectedCoordinates.length}개 좌표)`
-                : '📍 지도에서 영역 설정'}
+              부스 관리
             </button>
-            
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setIsAddingBooth(false);
-                  resetForm();
-                }}
-                className="flex-1 py-2 bg-gray-500 text-white rounded-lg"
-              >
-                취소
-              </button>
-            </div>
+            <button
+              onClick={() => setActiveTab('announcements')}
+              className={`flex-1 sm:flex-initial sm:px-8 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'announcements'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              공지사항 관리
+            </button>
+            <button
+              onClick={() => setActiveTab('messages')}
+              className={`flex-1 sm:flex-initial sm:px-8 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'messages'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              메시지 관리
+            </button>
           </div>
         </div>
-      )}
-      {/* 부스 목록 */}
-      <div className="p-4">
-        <h3 className="font-semibold mb-3 text-gray-700">
-          등록된 부스 ({booths.length})
-        </h3>
-        <div className="space-y-2">
-          {booths.length === 0 && (
-            <p className="text-center py-8 text-gray-400">
-              등록된 부스가 없습니다
-            </p>
-          )}
-          {booths.map(booth => (
-            <div 
-              key={booth.id}
-              className="bg-white border rounded-lg p-3"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex-1">
-                  <h4 className="font-semibold flex items-center gap-1">
-                    {(boothCategoryConfig[booth.category] || boothCategoryConfig.info).icon}
-                    {booth.name}
-                  </h4>
-                  <span className="text-xs px-2 py-0.5 bg-gray-100 rounded inline-block mt-1">
-                    {(boothCategoryConfig[booth.category] || boothCategoryConfig.info).name}
-                  </span>
+      </div>
+
+      {/* 탭 컨텐츠 - PC 반응형 컨테이너 */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {activeTab === 'messages' ? (
+          <AdminChatManager />
+        ) : activeTab === 'announcements' ? (
+          <AnnouncementManager />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* 왼쪽: 지도 영역 (PC에서 2/3) */}
+            <div className="lg:col-span-2 space-y-4">
+              {/* 부스 관리 지도 */}
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div className="h-[500px] relative">
+                  <AdminMap
+                    onCoordinateSelect={() => {}}
+                    selectedCoordinates={[]}
+                    booths={booths}
+                    isAddingMode={false}
+                    onDeleteBooth={handleDeleteBooth}
+                    onEditBooth={handleEditBooth}
+                  />
                 </div>
-                <span className={`text-xs px-2 py-1 rounded ${
-                  booth.isActive 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-gray-100 text-gray-500'
-                }`}>
-                  {booth.isActive ? '운영중' : '중단'}
-                </span>
               </div>
-              
-              <p className="text-sm text-gray-600 mb-2">{booth.description}</p>
-              <p className="text-xs text-gray-500 mb-2">⏰ {booth.operatingHours}</p>
-              
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEditBooth(booth)}
-                    className="flex-1 py-1.5 text-xs bg-blue-100 text-blue-700 rounded"
-                  >
-                    수정
-                  </button>
-                  <button
-                    onClick={() => toggleBoothActive(booth)}
-                    className={`flex-1 py-1.5 text-xs rounded ${
-                      booth.isActive
-                        ? 'bg-orange-100 text-orange-700'
-                        : 'bg-green-100 text-green-700'
-                    }`}
-                  >
-                    {booth.isActive ? '운영 중단' : '운영 재개'}
-                  </button>
-                  <button
-                    onClick={() => handleDeleteBooth(booth.id)}
-                    className="flex-1 py-1.5 text-xs bg-red-100 text-red-700 rounded"
-                  >
-                    삭제
-                  </button>
+
+              {/* 부스 추가 버튼 */}
+              <button
+                onClick={() => setShowMap(true)}
+                className="w-full py-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors shadow-sm"
+              >
+                📍 지도에서 부스 등록하기
+              </button>
+            </div>
+
+            {/* 오른쪽: 부스 목록 (PC에서 1/3) */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-sm p-4 sticky top-24">
+                <h3 className="font-semibold mb-4 text-gray-700 text-lg">
+                  등록된 부스 ({booths.length})
+                </h3>
+                <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                  {booths.length === 0 && (
+                    <p className="text-center py-12 text-gray-400">
+                      등록된 부스가 없습니다
+                    </p>
+                  )}
+                  {booths.map(booth => (
+                    <div
+                      key={booth.id}
+                      className="border rounded-lg p-3 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold flex items-center gap-1 text-sm truncate">
+                            {(boothCategoryConfig[booth.category] || boothCategoryConfig.info).icon}
+                            <span className="truncate">{booth.name}</span>
+                          </h4>
+                          <span className="text-xs px-2 py-0.5 bg-gray-100 rounded inline-block mt-1">
+                            {(boothCategoryConfig[booth.category] || boothCategoryConfig.info).name}
+                          </span>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded flex-shrink-0 ml-2 ${
+                          booth.isActive
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-gray-100 text-gray-500'
+                        }`}>
+                          {booth.isActive ? '운영중' : '중단'}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">{booth.description}</p>
+                      <p className="text-xs text-gray-500 mb-3">⏰ {booth.operatingHours}</p>
+
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-3 gap-1">
+                          <button
+                            onClick={() => handleEditBooth(booth)}
+                            className="py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                          >
+                            수정
+                          </button>
+                          <button
+                            onClick={() => toggleBoothActive(booth)}
+                            className={`py-1.5 text-xs rounded transition-colors ${
+                              booth.isActive
+                                ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            }`}
+                          >
+                            {booth.isActive ? '중단' : '재개'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteBooth(booth.id)}
+                            className="py-1.5 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                          >
+                            삭제
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => handleCopyBoothArea(booth)}
+                          className="w-full py-1.5 text-xs bg-purple-100 text-purple-700 rounded border border-purple-200 hover:bg-purple-200 transition-colors"
+                        >
+                          📋 영역 복사
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <button
-                  onClick={() => handleCopyBoothArea(booth)}
-                  className="w-full py-1.5 text-xs bg-purple-100 text-purple-700 rounded border border-purple-200"
-                >
-                  📋 영역 복사하기
-                </button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
-        </>
-      )}
     </div>
   );
 }

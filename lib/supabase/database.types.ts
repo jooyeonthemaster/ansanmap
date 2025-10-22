@@ -169,6 +169,70 @@ export interface Database {
           updated_at?: string
         }
       }
+      chat_rooms: {
+        Row: {
+          id: string
+          user_device_id: string
+          user_name: string | null
+          room_type: string
+          status: string | null
+          last_message: string | null
+          last_message_at: string | null
+          unread_count: number | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_device_id: string
+          user_name?: string | null
+          room_type: string
+          status?: string | null
+          last_message?: string | null
+          last_message_at?: string | null
+          unread_count?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_device_id?: string
+          user_name?: string | null
+          room_type?: string
+          status?: string | null
+          last_message?: string | null
+          last_message_at?: string | null
+          unread_count?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      messages: {
+        Row: {
+          id: string
+          room_id: string
+          sender_type: string
+          content: string
+          is_read: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          room_id: string
+          sender_type: string
+          content: string
+          is_read?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          room_id?: string
+          sender_type?: string
+          content?: string
+          is_read?: boolean | null
+          created_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never

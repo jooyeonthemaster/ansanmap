@@ -6,7 +6,14 @@
       "Read(//c/Users/jooye/Desktop/20251012aimap/**)",
       "Bash(cat:*)",
       "Bash(npm run build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(vercel --prod:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(tree:*)",
+      "Bash(npx supabase:*)",
+      "Bash(del nul)"
     ],
     "deny": [],
     "ask": []

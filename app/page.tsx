@@ -4,7 +4,7 @@ import { useState, Suspense, lazy } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { initializeSampleData } from '@/lib/sample-data';
-import { Map, Info, Settings, RefreshCw } from 'lucide-react';
+import { Map, Info, Settings, RefreshCw, MessageCircle } from 'lucide-react';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import NetworkStatus from '@/components/ui/NetworkStatus';
 
@@ -16,10 +16,11 @@ const EnhancedKakaoMap = dynamic(() => import('@/components/EnhancedKakaoMap'), 
 
 const FavoritesPage = lazy(() => import('@/components/FavoritesPage'));
 const InfoPage = lazy(() => import('@/components/InfoPage'));
+const MessagePage = lazy(() => import('@/components/MessagePage'));
 
 export default function Home() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'map' | 'favorites' | 'info'>('map');
+  const [activeTab, setActiveTab] = useState<'map' | 'favorites' | 'info' | 'messages'>('map');
 
   const handleInitSampleData = () => {
     initializeSampleData();
@@ -59,16 +60,22 @@ export default function Home() {
         {activeTab === 'map' && (
           <EnhancedKakaoMap />
         )}
-        
+
         {activeTab === 'favorites' && (
           <Suspense fallback={<SkeletonLoader />}>
             <FavoritesPage onBoothSelect={handleBoothSelect} />
           </Suspense>
         )}
-        
+
         {activeTab === 'info' && (
           <Suspense fallback={<SkeletonLoader />}>
             <InfoPage />
+          </Suspense>
+        )}
+
+        {activeTab === 'messages' && (
+          <Suspense fallback={<SkeletonLoader />}>
+            <MessagePage />
           </Suspense>
         )}
       </div>
@@ -100,6 +107,18 @@ export default function Home() {
             <Heart className={`w-5 h-5 ${activeTab === 'favorites' ? 'fill-current' : ''}`} />
             <span className="text-xs font-medium">즐겨찾기</span>
           </button> */}
+
+          <button
+            onClick={() => setActiveTab('messages')}
+            className={`flex-1 py-2 flex flex-col items-center gap-1 transition-all ${
+              activeTab === 'messages'
+                ? 'text-blue-600 scale-110'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <MessageCircle className="w-5 h-5" />
+            <span className="text-xs font-medium">메시지</span>
+          </button>
 
           <button
             onClick={() => setActiveTab('info')}
