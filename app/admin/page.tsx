@@ -8,12 +8,13 @@ import { boothCategoryConfig, BoothCategory } from '@/lib/booth-config';
 import AdminMap from '@/components/AdminMap';
 import AnnouncementManager from '@/components/AnnouncementManager';
 import AdminChatManager from '@/components/AdminChatManager';
+import FestivalDataManager from '@/components/FestivalDataManager';
 import toast from 'react-hot-toast';
 import festivalData from '@/asv-festival-2025.json';
 
 export default function AdminPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'booths' | 'announcements' | 'messages'>('booths');
+  const [activeTab, setActiveTab] = useState<'booths' | 'announcements' | 'messages' | 'festival'>('booths');
   const [booths, setBooths] = useState<Booth[]>([]);
   const [isAddingBooth, setIsAddingBooth] = useState(false);
   const [editingBoothId, setEditingBoothId] = useState<string | null>(null);
@@ -486,13 +487,27 @@ export default function AdminPage() {
             >
               메시지 관리
             </button>
+            <button
+              onClick={() => setActiveTab('festival')}
+              className={`flex-1 sm:flex-initial sm:px-8 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'festival'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              축제 데이터
+            </button>
           </div>
         </div>
       </div>
 
       {/* 탭 컨텐츠 - PC 반응형 컨테이너 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 'messages' ? (
+        {activeTab === 'festival' ? (
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden h-[calc(100vh-180px)]">
+            <FestivalDataManager />
+          </div>
+        ) : activeTab === 'messages' ? (
           <AdminChatManager />
         ) : activeTab === 'announcements' ? (
           <AnnouncementManager />
