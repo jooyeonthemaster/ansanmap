@@ -13,7 +13,15 @@
       "Bash(if exist .next rmdir /s /q .next)",
       "Bash(tree:*)",
       "Bash(npx supabase:*)",
-      "Bash(del nul)"
+      "Bash(del nul)",
+      "Bash(npx vercel --prod)",
+      "Bash(dir:*)",
+      "Read(//c/**)",
+      "Bash(find:*)",
+      "Bash(awk:*)",
+      "Bash(curl:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

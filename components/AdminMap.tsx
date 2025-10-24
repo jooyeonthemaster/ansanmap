@@ -12,6 +12,7 @@ interface AdminMapProps {
   isAddingMode: boolean;
   onDeleteBooth?: (boothId: string) => void;
   onEditBooth?: (booth: Booth) => void;
+  onBoothUpdated?: () => void; // 부스 정보 수정 후 콜백
 }
 
 export default function AdminMap({
@@ -20,7 +21,8 @@ export default function AdminMap({
   booths,
   isAddingMode,
   onDeleteBooth,
-  onEditBooth
+  onEditBooth,
+  onBoothUpdated
 }: AdminMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<unknown>(null);
@@ -36,6 +38,14 @@ export default function AdminMap({
   const boothLabelsRef = useRef<Map<string, unknown>>(new Map());
   const [previewBooth, setPreviewBooth] = useState<Booth | null>(null);
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
+  const [isEditingBooth, setIsEditingBooth] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    description: '',
+    category: 'info' as Booth['category'],
+    operatingHours: '',
+    contact: '',
+  });
 
 
   // 카카오맵 초기화
@@ -491,78 +501,224 @@ export default function AdminMap({
         <div className="absolute bottom-4 left-4 right-4 bg-white rounded-lg shadow-xl z-20 max-w-md mx-auto">
           <div className="relative">
             <button
-              onClick={() => setPreviewBooth(null)}
-              className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-gray-200 rounded-full transition"
+              onClick={() => {
+                setPreviewBooth(null);
+                setIsEditingBooth(false);
+              }}
+              className="absolute top-3 right-3 p-1.5 bg-gray-100 hover:bg-gray-200 rounded-full transition z-10"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center text-2xl">
-                  {(boothCategoryConfig[previewBooth.category] || boothCategoryConfig.info).icon}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg">{previewBooth.name}</h3>
-                  <p className="text-xs text-gray-600">{(boothCategoryConfig[previewBooth.category] || boothCategoryConfig.info).name}</p>
-                </div>
-              </div>
-
-              <div className="space-y-2 text-sm">
-                <p className="text-gray-700">{previewBooth.description}</p>
-
-                {previewBooth.operatingHours && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Clock className="w-4 h-4" />
-                    <span>{previewBooth.operatingHours}</span>
+              {!isEditingBooth ? (
+                // 보기 모드
+                <>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center text-2xl">
+                      {(boothCategoryConfig[previewBooth.category] || boothCategoryConfig.info).icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg">{previewBooth.name}</h3>
+                      <p className="text-xs text-gray-600">{(boothCategoryConfig[previewBooth.category] || boothCategoryConfig.info).name}</p>
+                    </div>
                   </div>
-                )}
 
-                {previewBooth.contact && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Phone className="w-4 h-4" />
-                    <span>{previewBooth.contact}</span>
-                  </div>
-                )}
-              </div>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-gray-700">{previewBooth.description}</p>
 
-              <div className="mt-3 pt-3 border-t">
-                {isAddingMode && (
-                  <p className="text-xs text-gray-500 mb-3">
-                    💡 이 부스의 정보입니다. 새 영역을 그리고 오른쪽 목록에서 부스를 선택하세요.
-                  </p>
-                )}
-
-                {/* 수정/삭제 버튼은 항상 표시 */}
-                {(onEditBooth || onDeleteBooth) && (
-                  <div className="flex gap-2">
-                    {onEditBooth && (
-                      <button
-                        onClick={() => {
-                          onEditBooth(previewBooth);
-                          setPreviewBooth(null);
-                        }}
-                        className="flex-1 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-medium transition"
-                      >
-                        수정
-                      </button>
+                    {previewBooth.operatingHours && (
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Clock className="w-4 h-4" />
+                        <span>{previewBooth.operatingHours}</span>
+                      </div>
                     )}
-                    {onDeleteBooth && (
-                      <button
-                        onClick={() => {
-                          if (confirm(`"${previewBooth.name}" 부스를 삭제하시겠습니까?`)) {
-                            onDeleteBooth(previewBooth.id);
+
+                    {previewBooth.contact && (
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Phone className="w-4 h-4" />
+                        <span>{previewBooth.contact}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t">
+                    {isAddingMode && (
+                      <p className="text-xs text-gray-500 mb-3">
+                        💡 이 부스의 정보입니다. 새 영역을 그리고 오른쪽 목록에서 부스를 선택하세요.
+                      </p>
+                    )}
+
+                    {/* 수정/삭제 버튼 */}
+                    {(onEditBooth || onDeleteBooth) && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setIsEditingBooth(true);
+                            setEditFormData({
+                              name: previewBooth.name,
+                              description: previewBooth.description || '',
+                              category: previewBooth.category,
+                              operatingHours: previewBooth.operatingHours || '',
+                              contact: previewBooth.contact || '',
+                            });
+                          }}
+                          className="flex-1 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-medium transition"
+                        >
+                          정보 수정
+                        </button>
+                        {onEditBooth && (
+                          <button
+                            onClick={() => {
+                              onEditBooth(previewBooth);
+                              setPreviewBooth(null);
+                            }}
+                            className="flex-1 py-2 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 font-medium transition"
+                          >
+                            위치 수정
+                          </button>
+                        )}
+                        {onDeleteBooth && (
+                          <button
+                            onClick={() => {
+                              if (confirm(`"${previewBooth.name}" 부스를 삭제하시겠습니까?`)) {
+                                onDeleteBooth(previewBooth.id);
+                                setPreviewBooth(null);
+                              }
+                            }}
+                            className="flex-1 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition"
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                // 편집 모드
+                <>
+                  <h3 className="font-bold text-lg mb-3">부스 정보 수정</h3>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        부스 이름
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.name}
+                        onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                        className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="예: A1 - AI바둑로봇 체험"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        부스 설명
+                      </label>
+                      <textarea
+                        value={editFormData.description}
+                        onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                        className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        rows={3}
+                        placeholder="예: 한양대학교 ERICA캠퍼스 로봇직업교육센터"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        카테고리
+                      </label>
+                      <select
+                        value={editFormData.category}
+                        onChange={(e) => setEditFormData({...editFormData, category: e.target.value as Booth['category']})}
+                        className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {Object.entries(boothCategoryConfig).map(([key, config]) => (
+                          <option key={key} value={key}>
+                            {config.icon} {config.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        운영 시간 (선택)
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.operatingHours}
+                        onChange={(e) => setEditFormData({...editFormData, operatingHours: e.target.value})}
+                        className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="예: 10:00 - 17:00"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        연락처 (선택)
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.contact}
+                        onChange={(e) => setEditFormData({...editFormData, contact: e.target.value})}
+                        className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="예: 031-400-5000"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t flex gap-2">
+                    <button
+                      onClick={async () => {
+                        if (!editFormData.name.trim() || !editFormData.description.trim()) {
+                          alert('부스 이름과 설명은 필수입니다.');
+                          return;
+                        }
+
+                        try {
+                          // Supabase 업데이트
+                          const { updateBooth: updateSupabaseBooth } = await import('@/lib/supabase/booth-api');
+                          const result = await updateSupabaseBooth(previewBooth.id, {
+                            name: editFormData.name,
+                            description: editFormData.description,
+                            category: editFormData.category,
+                            operatingHours: editFormData.operatingHours,
+                            contact: editFormData.contact,
+                          });
+
+                          if (result) {
+                            alert('부스 정보가 수정되었습니다!');
+                            setIsEditingBooth(false);
                             setPreviewBooth(null);
+                            // 부모 컴포넌트에 부스 목록 새로고침 요청
+                            if (onBoothUpdated) {
+                              onBoothUpdated();
+                            }
+                          } else {
+                            alert('부스 수정에 실패했습니다.');
                           }
-                        }}
-                        className="flex-1 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition"
-                      >
-                        삭제
-                      </button>
-                    )}
+                        } catch (error) {
+                          console.error('Update error:', error);
+                          alert('부스 수정 중 오류가 발생했습니다.');
+                        }
+                      }}
+                      className="flex-1 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition"
+                    >
+                      저장
+                    </button>
+                    <button
+                      onClick={() => setIsEditingBooth(false)}
+                      className="flex-1 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition"
+                    >
+                      취소
+                    </button>
                   </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </div>
         </div>

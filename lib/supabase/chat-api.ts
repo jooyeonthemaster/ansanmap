@@ -5,7 +5,7 @@
  */
 
 import { supabase } from './client';
-import type { ChatRoom, CreateChatRoomDto, RoomType } from '../types';
+import type { ChatRoom, RoomType } from '../types';
 import type { Database } from './database.types';
 
 /**

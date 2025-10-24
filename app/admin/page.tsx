@@ -9,13 +9,32 @@ import AdminMap from '@/components/AdminMap';
 import AnnouncementManager from '@/components/AnnouncementManager';
 import AdminChatManager from '@/components/AdminChatManager';
 import FestivalDataManager from '@/components/FestivalDataManager';
+import FestivalInfoManager from '@/components/FestivalInfoManager';
 import toast from 'react-hot-toast';
-import festivalData from '@/asv-festival-2025.json';
+
+// Festival data type
+interface FestivalBooth {
+  boothNumber: string;
+  programName: string;
+  organization: string;
+}
+
+interface ZoneData {
+  name: string;
+  theme?: string;
+  booths?: FestivalBooth[];
+}
+
+interface ASVFestival2025 {
+  zones: Record<string, ZoneData>;
+}
 
 export default function AdminPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'booths' | 'announcements' | 'messages' | 'festival'>('booths');
+  const [activeTab, setActiveTab] = useState<'booths' | 'announcements' | 'messages' | 'festival' | 'festivalInfo'>('booths');
   const [booths, setBooths] = useState<Booth[]>([]);
+  const [festivalData, setFestivalData] = useState<ASVFestival2025 | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isAddingBooth, setIsAddingBooth] = useState(false);
   const [editingBoothId, setEditingBoothId] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
@@ -37,14 +56,29 @@ export default function AdminPage() {
     price: ''
   });
 
-  // 부스 목록 로드
+  // 부스 목록 및 축제 데이터 로드
   useEffect(() => {
     loadBooths();
+    loadFestivalData();
   }, []);
 
   const loadBooths = async () => {
     const data = await getBooths();
     setBooths(data);
+  };
+
+  const loadFestivalData = async () => {
+    try {
+      const response = await fetch('/api/festival-data');
+      if (!response.ok) {
+        throw new Error('Failed to fetch festival data');
+      }
+      const data: ASVFestival2025 = await response.json();
+      setFestivalData(data);
+    } catch (error) {
+      console.error('Festival data loading error:', error);
+      toast.error('축제 데이터를 불러오는데 실패했습니다.');
+    }
   };
 
   // 부스 수정 시작
@@ -180,12 +214,12 @@ export default function AdminPage() {
   const getAllBooths = () => {
     const allBooths: Array<{ zone: string; zoneName: string; booth: { boothNumber: string; programName: string; organization: string } }> = [];
 
+    if (!festivalData) return allBooths;
+
     Object.entries(festivalData.zones).forEach(([zoneKey, zoneData]) => {
       // booths 배열이 있는 zone만 처리
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((zoneData as any).booths && Array.isArray((zoneData as any).booths)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (zoneData as any).booths.forEach((booth: { boothNumber: string; programName: string; organization: string }) => {
+      if (zoneData.booths && Array.isArray(zoneData.booths)) {
+        zoneData.booths.forEach((booth: { boothNumber: string; programName: string; organization: string }) => {
           allBooths.push({
             zone: zoneKey,
             zoneName: zoneData.name,
@@ -213,39 +247,42 @@ export default function AdminPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
-          {Object.entries(festivalData.zones).map(([zoneKey, zoneData]) => {
-            // booths 배열이 있는 zone만 렌더링
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if (!(zoneData as any).booths || !Array.isArray((zoneData as any).booths)) {
-              return null;
-            }
+          {!festivalData ? (
+            <div className="text-center py-12 text-gray-400">
+              축제 데이터를 불러오는 중...
+            </div>
+          ) : (
+            Object.entries(festivalData.zones).map(([zoneKey, zoneData]) => {
+              // booths 배열이 있는 zone만 렌더링
+              if (!zoneData.booths || !Array.isArray(zoneData.booths)) {
+                return null;
+              }
 
-            return (
-              <div key={zoneKey} className="mb-6">
-                <h4 className="font-bold text-lg mb-2 text-blue-600">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {zoneData.name} - {(zoneData as any).theme}
-                </h4>
-                <div className="space-y-2">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {(zoneData as any).booths.map((booth: { boothNumber: string; programName: string; organization: string }) => (
-                    <button
-                      key={booth.boothNumber}
-                      onClick={() => handleSelectBoothFromJson(booth)}
-                      className="w-full text-left p-3 bg-gray-50 hover:bg-blue-50 border rounded-lg transition"
-                    >
-                      <div className="font-semibold text-sm">
-                        {booth.boothNumber} - {booth.programName}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">
-                        {booth.organization}
-                      </div>
-                    </button>
-                  ))}
+              return (
+                <div key={zoneKey} className="mb-6">
+                  <h4 className="font-bold text-lg mb-2 text-blue-600">
+                    {zoneData.name} - {zoneData.theme}
+                  </h4>
+                  <div className="space-y-2">
+                    {zoneData.booths.map((booth: { boothNumber: string; programName: string; organization: string }) => (
+                      <button
+                        key={booth.boothNumber}
+                        onClick={() => handleSelectBoothFromJson(booth)}
+                        className="w-full text-left p-3 bg-gray-50 hover:bg-blue-50 border rounded-lg transition"
+                      >
+                        <div className="font-semibold text-sm">
+                          {booth.boothNumber} - {booth.programName}
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">
+                          {booth.organization}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
     );
@@ -318,6 +355,7 @@ export default function AdminPage() {
               isAddingMode={true}
               onDeleteBooth={handleDeleteBooth}
               onEditBooth={handleEditBooth}
+              onBoothUpdated={loadBooths}
             />
           </div>
 
@@ -363,78 +401,82 @@ export default function AdminPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-3">
-            {Object.entries(festivalData.zones).map(([zoneKey, zoneData]) => {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              if (!(zoneData as any).booths || !Array.isArray((zoneData as any).booths)) {
-                return null;
-              }
-
-              // 필터링된 부스 목록 (검색 + 미할당 필터)
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const filteredBooths = (zoneData as any).booths.filter((booth: { boothNumber: string; programName: string; organization: string }) => {
-                // 검색어 필터
-                if (searchQuery.trim()) {
-                  const query = searchQuery.toLowerCase();
-                  const matchesSearch =
-                    booth.boothNumber.toLowerCase().includes(query) ||
-                    booth.programName.toLowerCase().includes(query) ||
-                    booth.organization.toLowerCase().includes(query);
-
-                  if (!matchesSearch) return false;
+            {!festivalData ? (
+              <div className="text-center py-12 text-gray-400 text-xs">
+                축제 데이터를 불러오는 중...
+              </div>
+            ) : (
+              Object.entries(festivalData.zones).map(([zoneKey, zoneData]) => {
+                if (!zoneData.booths || !Array.isArray(zoneData.booths)) {
+                  return null;
                 }
 
-                // 미할당 필터
-                if (showOnlyUnassigned) {
-                  return !isBoothAssigned(booth.boothNumber);
+                // 필터링된 부스 목록 (검색 + 미할당 필터)
+                const filteredBooths = zoneData.booths.filter((booth: { boothNumber: string; programName: string; organization: string }) => {
+                  // 검색어 필터
+                  if (searchQuery.trim()) {
+                    const query = searchQuery.toLowerCase();
+                    const matchesSearch =
+                      booth.boothNumber.toLowerCase().includes(query) ||
+                      booth.programName.toLowerCase().includes(query) ||
+                      booth.organization.toLowerCase().includes(query);
+
+                    if (!matchesSearch) return false;
+                  }
+
+                  // 미할당 필터
+                  if (showOnlyUnassigned) {
+                    return !isBoothAssigned(booth.boothNumber);
+                  }
+                  return true;
+                });
+
+                if (filteredBooths.length === 0) {
+                  return null;
                 }
-                return true;
-              });
 
-              if (filteredBooths.length === 0) {
-                return null;
-              }
+                return (
+                  <div key={zoneKey} className="mb-4">
+                    <h4 className="font-bold text-sm mb-2 text-blue-600 sticky top-0 bg-gray-50 py-1">
+                      {zoneData.name}
+                    </h4>
+                    <div className="space-y-1">
+                      {filteredBooths.map((booth: { boothNumber: string; programName: string; organization: string }) => {
+                        const isAssigned = isBoothAssigned(booth.boothNumber);
+                        const isHighlighted = highlightedBoothId === booth.boothNumber;
 
-              return (
-                <div key={zoneKey} className="mb-4">
-                  <h4 className="font-bold text-sm mb-2 text-blue-600 sticky top-0 bg-gray-50 py-1">
-                    {zoneData.name}
-                  </h4>
-                  <div className="space-y-1">
-                    {filteredBooths.map((booth: { boothNumber: string; programName: string; organization: string }) => {
-                      const isAssigned = isBoothAssigned(booth.boothNumber);
-                      const isHighlighted = highlightedBoothId === booth.boothNumber;
-
-                      return (
-                        <button
-                          key={booth.boothNumber}
-                          onClick={() => handleQuickSaveBooth(booth)}
-                          disabled={selectedCoordinates.length < 3 || isAssigned}
-                          className={`w-full text-left p-2 border rounded transition text-xs ${
-                            isHighlighted
-                              ? 'bg-green-100 border-green-500 scale-105'
-                              : isAssigned
-                              ? 'bg-gray-100 border-gray-300 opacity-60 cursor-not-allowed'
-                              : 'bg-white hover:bg-blue-50 border-gray-300'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="font-semibold flex-1">
-                              {booth.boothNumber} - {booth.programName}
+                        return (
+                          <button
+                            key={booth.boothNumber}
+                            onClick={() => handleQuickSaveBooth(booth)}
+                            disabled={selectedCoordinates.length < 3 || isAssigned}
+                            className={`w-full text-left p-2 border rounded transition text-xs ${
+                              isHighlighted
+                                ? 'bg-green-100 border-green-500 scale-105'
+                                : isAssigned
+                                ? 'bg-gray-100 border-gray-300 opacity-60 cursor-not-allowed'
+                                : 'bg-white hover:bg-blue-50 border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="font-semibold flex-1">
+                                {booth.boothNumber} - {booth.programName}
+                              </div>
+                              {isAssigned && (
+                                <span className="text-green-600 ml-2">✓</span>
+                              )}
                             </div>
-                            {isAssigned && (
-                              <span className="text-green-600 ml-2">✓</span>
-                            )}
-                          </div>
-                          <div className="text-gray-600 mt-0.5 line-clamp-1">
-                            {booth.organization}
-                          </div>
-                        </button>
-                      );
-                    })}
+                            <div className="text-gray-600 mt-0.5 line-clamp-1">
+                              {booth.organization}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       </div>
@@ -497,13 +539,27 @@ export default function AdminPage() {
             >
               축제 데이터
             </button>
+            <button
+              onClick={() => setActiveTab('festivalInfo')}
+              className={`flex-1 sm:flex-initial sm:px-8 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'festivalInfo'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              축제 정보
+            </button>
           </div>
         </div>
       </div>
 
       {/* 탭 컨텐츠 - PC 반응형 컨테이너 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 'festival' ? (
+        {activeTab === 'festivalInfo' ? (
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden h-[calc(100vh-180px)]">
+            <FestivalInfoManager />
+          </div>
+        ) : activeTab === 'festival' ? (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden h-[calc(100vh-180px)]">
             <FestivalDataManager />
           </div>
@@ -525,6 +581,7 @@ export default function AdminPage() {
                     isAddingMode={false}
                     onDeleteBooth={handleDeleteBooth}
                     onEditBooth={handleEditBooth}
+                    onBoothUpdated={loadBooths}
                   />
                 </div>
               </div>

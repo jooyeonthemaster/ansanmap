@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, Suspense, lazy } from 'react';
-import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { initializeSampleData } from '@/lib/sample-data';
-import { Map, Info, Settings, RefreshCw, MessageCircle } from 'lucide-react';
+import { Map, Info, RefreshCw, MessageCircle } from 'lucide-react';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import NetworkStatus from '@/components/ui/NetworkStatus';
 
@@ -19,7 +18,6 @@ const InfoPage = lazy(() => import('@/components/InfoPage'));
 const MessagePage = lazy(() => import('@/components/MessagePage'));
 
 export default function Home() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'map' | 'favorites' | 'info' | 'messages'>('map');
 
   const handleInitSampleData = () => {
@@ -45,13 +43,14 @@ export default function Home() {
           >
             <RefreshCw className="w-4 h-4 group-hover:animate-spin" />
           </button>
-          <button
+          {/* 관리자 버튼 - 숨김 처리 */}
+          {/* <button
             onClick={() => router.push('/admin')}
             className="p-2 bg-gray-700 text-white rounded-full shadow-lg hover:bg-gray-800 transition-colors"
             title="관리자"
           >
             <Settings className="w-4 h-4" />
-          </button>
+          </button> */}
         </div>
       )}
 

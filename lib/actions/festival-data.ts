@@ -201,3 +201,108 @@ export async function searchBooths(keyword: string): Promise<FestivalBooth[]> {
       booth.organization.toLowerCase().includes(lowerKeyword)
   );
 }
+
+/**
+ * JSON 파일 데이터를 Supabase 부스와 동기화
+ * 부스 번호로 매칭하여 name과 description 업데이트
+ */
+export async function syncFestivalDataToSupabase(): Promise<{
+  success: boolean;
+  message: string;
+  details?: {
+    total: number;
+    updated: number;
+    notFound: number;
+  }
+}> {
+  try {
+    // Supabase client를 동적으로 import (server-side)
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+
+    // JSON 파일에서 모든 부스 가져오기
+    const festivalData = await getFestivalData();
+    const allFestivalBooths: FestivalBooth[] = [
+      ...festivalData.zones.advanceZone.booths,
+      ...festivalData.zones.shineZone.booths,
+      ...festivalData.zones.viewZone.booths,
+      ...festivalData.zones.futureScienceZone.booths,
+    ];
+
+    // Supabase에서 모든 부스 가져오기
+    const { data: supabaseBooths, error: fetchError } = await supabase
+      .from('booths')
+      .select('*');
+
+    if (fetchError) {
+      console.error('Supabase fetch error:', fetchError);
+      return {
+        success: false,
+        message: 'Supabase 부스 데이터를 불러오는데 실패했습니다.',
+      };
+    }
+
+    let updatedCount = 0;
+    let notFoundCount = 0;
+
+    // 각 Supabase 부스에 대해 JSON 데이터와 매칭
+    for (const supabaseBooth of supabaseBooths || []) {
+      // 부스 번호 추출 (예: "A1 - AI바둑로봇 체험" → "A1")
+      const boothNumberMatch = supabaseBooth.name.match(/^([A-Z]\d+)/);
+      if (!boothNumberMatch) {
+        continue; // 부스 번호 형식이 아니면 스킵
+      }
+
+      const boothNumber = boothNumberMatch[1];
+
+      // JSON 데이터에서 매칭되는 부스 찾기
+      const festivalBooth = allFestivalBooths.find(
+        (fb) => fb.boothNumber === boothNumber
+      );
+
+      if (festivalBooth) {
+        // 새로운 name과 description 생성
+        const newName = `${festivalBooth.boothNumber} - ${festivalBooth.programName}`;
+        const newDescription = festivalBooth.organization;
+
+        // Supabase 업데이트 (변경사항이 있을 때만)
+        if (
+          supabaseBooth.name !== newName ||
+          supabaseBooth.description !== newDescription
+        ) {
+          const { error: updateError } = await supabase
+            .from('booths')
+            .update({
+              name: newName,
+              description: newDescription,
+            })
+            .eq('id', supabaseBooth.id);
+
+          if (updateError) {
+            console.error(`Update error for booth ${boothNumber}:`, updateError);
+          } else {
+            updatedCount++;
+          }
+        }
+      } else {
+        notFoundCount++;
+      }
+    }
+
+    return {
+      success: true,
+      message: `동기화 완료: ${updatedCount}개 부스 업데이트됨`,
+      details: {
+        total: supabaseBooths?.length || 0,
+        updated: updatedCount,
+        notFound: notFoundCount,
+      },
+    };
+  } catch (error) {
+    console.error('Sync error:', error);
+    return {
+      success: false,
+      message: '동기화 중 오류가 발생했습니다.',
+    };
+  }
+}

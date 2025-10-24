@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import { getActiveAnnouncements } from '@/lib/actions/announcements';
 import { Announcement } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
+import { getFestivalInfo } from '@/lib/supabase/festival-info-api';
+import { FestivalInfo } from '@/lib/types/festival-info';
 
 export default function InfoPage() {
   const [totalPoints, setTotalPoints] = useState(0);
@@ -15,18 +17,22 @@ export default function InfoPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeTab, setActiveTab] = useState<'info' | 'stats' | 'rewards'>('info');
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [festivalInfo, setFestivalInfo] = useState<FestivalInfo | null>(null);
 
   useEffect(() => {
     setTotalPoints(getTotalPoints());
     setVisitedCount(getVisitedBooths().length);
     setCheckInCount(getCheckIns().length);
 
+    // 축제 정보 로드
+    loadFestivalInfo();
+
     // 공지사항 로드
     loadAnnouncements();
 
     // 실시간 구독 설정
     const supabase = createClient();
-    const channel = supabase
+    const announcementsChannel = supabase
       .channel('announcements')
       .on(
         'postgres_changes',
@@ -37,10 +43,29 @@ export default function InfoPage() {
       )
       .subscribe();
 
+    const festivalInfoChannel = supabase
+      .channel('festival_info')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'festival_info' },
+        () => {
+          loadFestivalInfo();
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(announcementsChannel);
+      supabase.removeChannel(festivalInfoChannel);
     };
   }, []);
+
+  const loadFestivalInfo = async () => {
+    const data = await getFestivalInfo();
+    if (data) {
+      setFestivalInfo(data);
+    }
+  };
 
   const loadAnnouncements = async () => {
     const data = await getActiveAnnouncements();
@@ -74,8 +99,12 @@ export default function InfoPage() {
     <div className="h-[calc(100vh-6.5rem)] overflow-y-auto bg-gray-50">
       {/* 헤더 */}
       <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-6">
-        <h1 className="text-2xl font-bold mb-2">한양대 ERICA 축제</h1>
-        <p className="text-white/80 text-sm">2025.11.01 - 11.02</p>
+        <h1 className="text-2xl font-bold mb-2">
+          {festivalInfo?.festival_name || '한양대 ERICA 축제'}
+        </h1>
+        <p className="text-white/80 text-sm">
+          {festivalInfo?.festival_dates || '2025.11.01 - 11.02'}
+        </p>
 
         {/* 실시간 공지사항 */}
         <div className="mt-6 space-y-2">
@@ -172,12 +201,12 @@ export default function InfoPage() {
               </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">11월 1일 (토)</span>
-                  <span className="font-medium">10:00 - 17:00</span>
+                  <span className="text-gray-600">{festivalInfo?.day1_date || '11월 1일 (토)'}</span>
+                  <span className="font-medium">{festivalInfo?.day1_hours || '10:00 - 17:00'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">11월 2일 (일)</span>
-                  <span className="font-medium">10:00 - 17:00</span>
+                  <span className="text-gray-600">{festivalInfo?.day2_date || '11월 2일 (일)'}</span>
+                  <span className="font-medium">{festivalInfo?.day2_hours || '10:00 - 17:00'}</span>
                 </div>
               </div>
             </div>
@@ -188,12 +217,12 @@ export default function InfoPage() {
                 오시는 길
               </h3>
               <p className="text-sm text-gray-600 mb-2">
-                경기도 안산시 상록구 한양대학로 55<br />
-                한양대학교 ERICA 캠퍼스
+                {festivalInfo?.address || '경기도 안산시 상록구 한양대학로 55'}<br />
+                {festivalInfo?.campus_name || '한양대학교 ERICA 캠퍼스'}
               </p>
               <div className="space-y-1 text-sm">
-                <p><span className="font-medium">지하철:</span> 4호선 한대앞역 셔틀버스 이용</p>
-                <p><span className="font-medium">버스:</span> 110, 110-1, 32, 3100번</p>
+                <p><span className="font-medium">지하철:</span> {festivalInfo?.subway_info || '4호선 한대앞역 셔틀버스 이용'}</p>
+                <p><span className="font-medium">버스:</span> {festivalInfo?.bus_info || '110, 110-1, 32, 3100번'}</p>
               </div>
             </div>
 
@@ -203,9 +232,9 @@ export default function InfoPage() {
                 문의
               </h3>
               <div className="space-y-2 text-sm">
-                <p><span className="font-medium">축제 운영본부:</span> 031-400-5114</p>
-                <p><span className="font-medium">학생지원팀:</span> 031-400-5115</p>
-                <p><span className="font-medium">분실물센터:</span> 031-400-5116</p>
+                <p><span className="font-medium">{festivalInfo?.main_contact_label || '축제 운영본부'}:</span> {festivalInfo?.main_contact || '031-400-5114'}</p>
+                <p><span className="font-medium">{festivalInfo?.support_contact_label || '학생지원팀'}:</span> {festivalInfo?.support_contact || '031-400-5115'}</p>
+                <p><span className="font-medium">{festivalInfo?.lost_found_contact_label || '분실물센터'}:</span> {festivalInfo?.lost_found_contact || '031-400-5116'}</p>
               </div>
             </div>
           </motion.div>

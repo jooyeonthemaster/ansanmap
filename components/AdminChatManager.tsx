@@ -10,7 +10,6 @@ import {
   closeChatRoom,
   searchChatRooms,
   toggleChatRoomImportant,
-  getImportantChatRooms,
 } from '@/lib/supabase/chat-api';
 import {
   getMessages,

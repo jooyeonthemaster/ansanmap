@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, Save, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Save, X, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   getFestivalData,
   addBooth,
   updateBooth,
   deleteBooth,
+  syncFestivalDataToSupabase,
 } from '@/lib/actions/festival-data';
 import type { FestivalBooth } from '@/asv-festival-2025.types';
 
@@ -30,6 +31,7 @@ export default function FestivalDataManager() {
   // 편집/추가 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState<'add' | 'edit'>('add');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [editingBooth, setEditingBooth] = useState<FestivalBooth | null>(null);
   const [originalBoothNumber, setOriginalBoothNumber] = useState('');
 
@@ -58,6 +60,7 @@ export default function FestivalDataManager() {
 
   useEffect(() => {
     loadBooths();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedZone]);
 
   // 검색 필터링
@@ -127,13 +130,11 @@ export default function FestivalDataManager() {
       }
 
       if (result.success) {
-        toast.success(result.message + ' 페이지를 새로고침합니다...');
+        toast.success(result.message);
         handleCloseModal();
 
-        // JSON 파일 변경 후 새로고침으로 HMR 에러 해결
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        // 데이터만 다시 로드 (페이지 새로고침 없이)
+        await loadBooths();
       } else {
         toast.error(result.message);
       }
@@ -142,6 +143,37 @@ export default function FestivalDataManager() {
       console.error(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Supabase 동기화
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncToSupabase = async () => {
+    if (!confirm('JSON 파일의 데이터를 Supabase 부스 정보와 동기화하시겠습니까?\n\n부스 번호로 매칭하여 name과 description이 업데이트됩니다.')) {
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      const result = await syncFestivalDataToSupabase();
+
+      if (result.success) {
+        toast.success(
+          `${result.message}\n\n` +
+          `전체: ${result.details?.total}개\n` +
+          `업데이트: ${result.details?.updated}개\n` +
+          `매칭 실패: ${result.details?.notFound}개`,
+          { duration: 5000 }
+        );
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error('동기화 중 오류가 발생했습니다.');
+      console.error(error);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -156,12 +188,10 @@ export default function FestivalDataManager() {
       const result = await deleteBooth(selectedZone, boothNumber);
 
       if (result.success) {
-        toast.success(result.message + ' 페이지를 새로고침합니다...');
+        toast.success(result.message);
 
-        // JSON 파일 변경 후 새로고침으로 HMR 에러 해결
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        // 데이터만 다시 로드 (페이지 새로고침 없이)
+        await loadBooths();
       } else {
         toast.error(result.message);
       }
@@ -208,6 +238,15 @@ export default function FestivalDataManager() {
               className="w-full pl-8 pr-3 py-2 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          <button
+            onClick={handleSyncToSupabase}
+            disabled={isLoading || isSyncing}
+            className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition disabled:opacity-50"
+            title="JSON 데이터를 Supabase와 동기화"
+          >
+            <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            동기화
+          </button>
           <button
             onClick={handleOpenAddModal}
             disabled={isLoading}
