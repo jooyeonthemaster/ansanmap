@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, Save, X, RefreshCw } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Save, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
-  getFestivalData,
-  addBooth,
-  updateBooth,
-  deleteBooth,
-  syncFestivalDataToSupabase,
-} from '@/lib/actions/festival-data';
-import type { FestivalBooth } from '@/asv-festival-2025.types';
+  getBoothsByZone,
+  addFestivalBooth,
+  updateFestivalBooth,
+  deleteFestivalBooth,
+  type FestivalBooth,
+  type CreateFestivalBoothDto,
+} from '@/lib/supabase/festival-booths-api';
 
 type ZoneType = 'advanceZone' | 'shineZone' | 'viewZone' | 'futureScienceZone';
 
@@ -19,6 +19,13 @@ const ZONE_NAMES: Record<ZoneType, string> = {
   shineZone: 'Shine Zone (빛나는 과학)',
   viewZone: 'View Zone (과학의 관점)',
   futureScienceZone: 'Future Science Zone (주제존)',
+};
+
+const ZONE_THEMES: Record<ZoneType, string> = {
+  advanceZone: '발전하는 과학',
+  shineZone: '빛나는 과학',
+  viewZone: '과학의 관점',
+  futureScienceZone: '주제존',
 };
 
 export default function FestivalDataManager() {
@@ -31,12 +38,11 @@ export default function FestivalDataManager() {
   // 편집/추가 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState<'add' | 'edit'>('add');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [editingBooth, setEditingBooth] = useState<FestivalBooth | null>(null);
   const [originalBoothNumber, setOriginalBoothNumber] = useState('');
 
   // 폼 상태
-  const [formData, setFormData] = useState<FestivalBooth>({
+  const [formData, setFormData] = useState({
     boothNumber: '',
     programName: '',
     organization: '',
@@ -46,10 +52,9 @@ export default function FestivalDataManager() {
   const loadBooths = async () => {
     setIsLoading(true);
     try {
-      const data = await getFestivalData();
-      const zoneBooths = data.zones[selectedZone].booths;
-      setBooths(zoneBooths);
-      setFilteredBooths(zoneBooths);
+      const data = await getBoothsByZone(selectedZone);
+      setBooths(data);
+      setFilteredBooths(data);
     } catch (error) {
       toast.error('데이터를 불러오는데 실패했습니다.');
       console.error(error);
@@ -73,8 +78,8 @@ export default function FestivalDataManager() {
     const keyword = searchKeyword.toLowerCase();
     const filtered = booths.filter(
       (booth) =>
-        booth.boothNumber.toLowerCase().includes(keyword) ||
-        booth.programName.toLowerCase().includes(keyword) ||
+        booth.booth_number.toLowerCase().includes(keyword) ||
+        booth.program_name.toLowerCase().includes(keyword) ||
         booth.organization.toLowerCase().includes(keyword)
     );
     setFilteredBooths(filtered);
@@ -95,8 +100,12 @@ export default function FestivalDataManager() {
   const handleOpenEditModal = (booth: FestivalBooth) => {
     setEditMode('edit');
     setEditingBooth(booth);
-    setOriginalBoothNumber(booth.boothNumber);
-    setFormData({ ...booth });
+    setOriginalBoothNumber(booth.booth_number);
+    setFormData({
+      boothNumber: booth.booth_number,
+      programName: booth.program_name,
+      organization: booth.organization,
+    });
     setIsModalOpen(true);
   };
 
@@ -124,16 +133,28 @@ export default function FestivalDataManager() {
       let result;
 
       if (editMode === 'add') {
-        result = await addBooth(selectedZone, formData);
+        // 추가
+        const boothData: CreateFestivalBoothDto = {
+          booth_number: formData.boothNumber,
+          program_name: formData.programName,
+          organization: formData.organization,
+          zone_key: selectedZone,
+          zone_name: ZONE_NAMES[selectedZone],
+          zone_theme: ZONE_THEMES[selectedZone],
+        };
+        result = await addFestivalBooth(boothData);
       } else {
-        result = await updateBooth(selectedZone, originalBoothNumber, formData);
+        // 수정
+        result = await updateFestivalBooth(originalBoothNumber, {
+          booth_number: formData.boothNumber,
+          program_name: formData.programName,
+          organization: formData.organization,
+        });
       }
 
       if (result.success) {
         toast.success(result.message);
         handleCloseModal();
-
-        // 데이터만 다시 로드 (페이지 새로고침 없이)
         await loadBooths();
       } else {
         toast.error(result.message);
@@ -146,37 +167,6 @@ export default function FestivalDataManager() {
     }
   };
 
-  // Supabase 동기화
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  const handleSyncToSupabase = async () => {
-    if (!confirm('JSON 파일의 데이터를 Supabase 부스 정보와 동기화하시겠습니까?\n\n부스 번호로 매칭하여 name과 description이 업데이트됩니다.')) {
-      return;
-    }
-
-    setIsSyncing(true);
-    try {
-      const result = await syncFestivalDataToSupabase();
-
-      if (result.success) {
-        toast.success(
-          `${result.message}\n\n` +
-          `전체: ${result.details?.total}개\n` +
-          `업데이트: ${result.details?.updated}개\n` +
-          `매칭 실패: ${result.details?.notFound}개`,
-          { duration: 5000 }
-        );
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error('동기화 중 오류가 발생했습니다.');
-      console.error(error);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
   // 부스 삭제
   const handleDeleteBooth = async (boothNumber: string) => {
     if (!confirm(`부스 ${boothNumber}를 삭제하시겠습니까?`)) {
@@ -185,12 +175,10 @@ export default function FestivalDataManager() {
 
     setIsLoading(true);
     try {
-      const result = await deleteBooth(selectedZone, boothNumber);
+      const result = await deleteFestivalBooth(boothNumber);
 
       if (result.success) {
         toast.success(result.message);
-
-        // 데이터만 다시 로드 (페이지 새로고침 없이)
         await loadBooths();
       } else {
         toast.error(result.message);
@@ -238,15 +226,6 @@ export default function FestivalDataManager() {
               className="w-full pl-8 pr-3 py-2 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <button
-            onClick={handleSyncToSupabase}
-            disabled={isLoading || isSyncing}
-            className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition disabled:opacity-50"
-            title="JSON 데이터를 Supabase와 동기화"
-          >
-            <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            동기화
-          </button>
           <button
             onClick={handleOpenAddModal}
             disabled={isLoading}
@@ -296,9 +275,9 @@ export default function FestivalDataManager() {
               </tr>
             ) : (
               filteredBooths.map((booth) => (
-                <tr key={booth.boothNumber} className="border-b hover:bg-gray-50">
-                  <td className="px-3 py-2 font-medium">{booth.boothNumber}</td>
-                  <td className="px-3 py-2">{booth.programName}</td>
+                <tr key={booth.booth_number} className="border-b hover:bg-gray-50">
+                  <td className="px-3 py-2 font-medium">{booth.booth_number}</td>
+                  <td className="px-3 py-2">{booth.program_name}</td>
                   <td className="px-3 py-2 text-gray-600">{booth.organization}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-center gap-1">
@@ -310,7 +289,7 @@ export default function FestivalDataManager() {
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDeleteBooth(booth.boothNumber)}
+                        onClick={() => handleDeleteBooth(booth.booth_number)}
                         className="p-1 text-red-600 hover:bg-red-50 rounded transition"
                         title="삭제"
                       >

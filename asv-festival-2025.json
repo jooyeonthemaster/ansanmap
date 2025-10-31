@@ -66,6 +66,11 @@
           "organization": "경기테크노파크"
         },
         {
+          "boothNumber": "k11",
+          "programName": "ai초상화",
+          "organization": "일해라컴퍼니"
+        },
+        {
           "boothNumber": "A12",
           "programName": "하이브리드 강아지로봇 만들기",
           "organization": "한국생산기술연구원"
