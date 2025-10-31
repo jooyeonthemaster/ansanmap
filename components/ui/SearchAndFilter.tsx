@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Filter, X, MapPin, Clock, Megaphone } from 'lucide-react';
+import { Search, Filter, X, MapPin, Megaphone } from 'lucide-react';
 import { Booth, Announcement } from '@/lib/types';
 import { boothCategoryConfig, BoothCategory } from '@/lib/booth-config';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,7 +18,6 @@ export default function SearchAndFilter({ booths, onFilter, onBoothSelect }: Sea
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<BoothCategory[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [congestionFilter] = useState<string>('all');
   const [searchResults, setSearchResults] = useState<Booth[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -43,18 +42,13 @@ export default function SearchAndFilter({ booths, onFilter, onBoothSelect }: Sea
       );
     }
 
-    // 혼잡도 필터링
-    if (congestionFilter !== 'all') {
-      filtered = filtered.filter(booth => booth.congestionLevel === congestionFilter);
-    }
-
     // 활성화된 부스만
     filtered = filtered.filter(booth => booth.isActive);
 
     setSearchResults(filtered);
     onFilter(filtered);
     setShowResults(searchQuery.length > 0);
-  }, [searchQuery, selectedCategories, congestionFilter, booths, onFilter]);
+  }, [searchQuery, selectedCategories, booths, onFilter]);
 
   // 공지사항 로드 및 실시간 구독
   useEffect(() => {
@@ -99,16 +93,6 @@ export default function SearchAndFilter({ booths, onFilter, onBoothSelect }: Sea
         ? prev.filter(c => c !== category)
         : [...prev, category]
     );
-  };
-
-  const getCongestionColor = (level?: string) => {
-    switch (level) {
-      case 'low': return 'text-green-600 bg-green-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
-      case 'high': return 'text-orange-600 bg-orange-50';
-      case 'very-high': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
   };
 
   return (
@@ -231,22 +215,6 @@ export default function SearchAndFilter({ booths, onFilter, onBoothSelect }: Sea
                   <span className="text-2xl">{(boothCategoryConfig[booth.category] || boothCategoryConfig.info).icon}</span>
                   <div className="text-left">
                     <p className="font-medium text-sm">{booth.name}</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      {booth.congestionLevel && (
-                        <span className={`px-2 py-0.5 rounded-full ${getCongestionColor(booth.congestionLevel)}`}>
-                          {booth.congestionLevel === 'low' && '여유'}
-                          {booth.congestionLevel === 'medium' && '보통'}
-                          {booth.congestionLevel === 'high' && '혼잡'}
-                          {booth.congestionLevel === 'very-high' && '매우 혼잡'}
-                        </span>
-                      )}
-                      {booth.waitingTime && booth.waitingTime > 0 && (
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {booth.waitingTime}분 대기
-                        </span>
-                      )}
-                    </div>
                   </div>
                 </div>
                 <MapPin className="w-4 h-4 text-gray-400" />

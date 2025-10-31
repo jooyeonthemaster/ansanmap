@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Heart, MapPin, Clock, Bell, BellOff } from 'lucide-react';
+import { Heart, MapPin, Bell, BellOff } from 'lucide-react';
 import { getFavorites, removeFavorite, getBooths } from '@/lib/utils/storage';
 import { Booth, Favorite } from '@/lib/types';
 import { boothCategoryConfig } from '@/lib/booth-config';
@@ -50,15 +50,6 @@ export default function FavoritesPage({ onBoothSelect }: FavoritesPageProps) {
     }
   };
 
-  const getCongestionColor = (level?: string) => {
-    switch (level) {
-      case 'low': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'very-high': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   if (favoriteBooths.length === 0) {
     return (
@@ -132,24 +123,8 @@ export default function FavoritesPage({ onBoothSelect }: FavoritesPageProps) {
                         </div>
                         
                         <p className="text-xs text-gray-500 mb-2">{booth.description}</p>
-                        
+
                         <div className="flex items-center gap-3 text-xs">
-                          {booth.congestionLevel && (
-                            <span className={`px-2 py-0.5 rounded-full ${getCongestionColor(booth.congestionLevel)}`}>
-                              {booth.congestionLevel === 'low' && '여유'}
-                              {booth.congestionLevel === 'medium' && '보통'}
-                              {booth.congestionLevel === 'high' && '혼잡'}
-                              {booth.congestionLevel === 'very-high' && '매우 혼잡'}
-                            </span>
-                          )}
-                          
-                          {booth.waitingTime !== undefined && (
-                            <span className="flex items-center gap-1 text-gray-600">
-                              <Clock className="w-3 h-3" />
-                              {booth.waitingTime > 0 ? `${booth.waitingTime}분` : '대기 없음'}
-                            </span>
-                          )}
-                          
                           <span className="flex items-center gap-1 text-gray-600">
                             <MapPin className="w-3 h-3" />
                             지도 보기

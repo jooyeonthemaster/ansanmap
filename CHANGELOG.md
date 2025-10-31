@@ -1,5 +1,53 @@
 # CHANGELOG
 
+## 2025-11-01 - [DELETE] 혼잡도 시스템 완전 제거
+
+**Changed Files**:
+- components/EnhancedKakaoMap.tsx (랜덤 혼잡도 생성 로직 제거, 지도 마커 색상 정규화)
+- components/ui/SearchAndFilter.tsx (혼잡도 표시 UI 제거, 죽은 필터 코드 제거)
+- components/FavoritesPage.tsx (혼잡도 표시 제거)
+
+**Changes**:
+- **REMOVE**: EnhancedKakaoMap.tsx의 랜덤 혼잡도 생성 로직
+  - `congestionLevel`, `waitingTime`, `currentVisitors`, `maxCapacity` 랜덤 생성 제거
+  - loadBooths 함수 및 Realtime 구독 콜백 모두 정리
+- **REMOVE**: 지도 마커의 혼잡도 기반 색상 시스템
+  - 폴리곤 fillOpacity 혼잡도 의존 제거 (고정값 0.3)
+  - strokeColor 혼잡도 의존 제거 (카테고리 기본 색상만 사용)
+  - 오버레이 background 혼잡도 그라데이션 제거 (흰색 고정)
+  - 오버레이 zIndex 혼잡도 기반 우선순위 제거 (고정값 5)
+- **REMOVE**: SearchAndFilter.tsx 혼잡도 관련 코드
+  - `congestionFilter` state 제거
+  - 혼잡도 필터링 로직 제거 (죽은 코드)
+  - `getCongestionColor()` 함수 제거
+  - 검색 결과에서 혼잡도 배지 및 대기시간 표시 제거
+  - `Clock` import 제거
+- **REMOVE**: FavoritesPage.tsx 혼잡도 관련 코드
+  - `getCongestionColor()` 함수 제거
+  - 즐겨찾기 목록에서 혼잡도 배지 및 대기시간 표시 제거
+  - `Clock` import 제거
+
+**Reason**:
+- 혼잡도 데이터가 실제로 존재하지 않음 (랜덤 더미 데이터만 생성)
+- 페이지 로드마다 랜덤 값 생성으로 의미 없는 정보 표시
+- 혼잡도 필터 UI는 이미 제거되었지만 로직은 남아있어 혼란 초래
+- 실제 혼잡도 계산 시스템이 없으므로 깔끔하게 제거
+
+**Impact**:
+- ✅ 지도 마커가 카테고리 기본 색상으로 일관되게 표시
+- ✅ 검색 결과 및 즐겨찾기 목록이 더 깔끔해짐
+- ✅ 의미 없는 랜덤 데이터 표시 제거로 사용자 혼란 방지
+- ✅ 죽은 코드 제거로 코드베이스 정리
+- ✅ 기존 기능에 영향 없음 (혼잡도는 optional 필드)
+- ✅ DB 스키마는 유지 (향후 실제 혼잡도 시스템 구현 시 재사용 가능)
+
+**Note**:
+- lib/types.ts의 혼잡도 타입 정의는 유지 (optional 필드)
+- DB 컬럼(`congestion_level`, `waiting_time`, `current_visitors`, `max_capacity`)은 유지
+- 향후 실제 혼잡도 시스템 구현 시 재활용 가능
+
+---
+
 ## 2025-01-22 22:00 - [ADD] 관리자 채팅방 검색 및 중요 표시 기능 구현
 
 **Changed Files**:

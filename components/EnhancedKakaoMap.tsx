@@ -34,13 +34,8 @@ export default function EnhancedKakaoMap() {
   useEffect(() => {
     const loadBooths = async () => {
       const loadedBooths = await getBooths();
-      // 시뮬레이션: 랜덤 혼잡도 및 대기시간 추가 (DB에 없는 경우)
       const enhancedBooths = loadedBooths.map((booth, index) => ({
         ...booth,
-        congestionLevel: booth.congestionLevel || (['low', 'medium', 'high', 'very-high'] as const)[Math.floor(Math.random() * 4)],
-        waitingTime: booth.waitingTime ?? Math.floor(Math.random() * 30),
-        currentVisitors: booth.currentVisitors ?? Math.floor(Math.random() * 50),
-        maxCapacity: booth.maxCapacity || 50,
         popularityScore: booth.popularityScore ?? (Math.random() * 5),
         webcamUrl: booth.webcamUrl || (index % 2 === 0 ? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' : undefined),
         tags: booth.tags || ['축제', '한양대', 'ERICA', '2025']
@@ -55,10 +50,6 @@ export default function EnhancedKakaoMap() {
     const unsubscribe = subscribeToBooths((updatedBooths) => {
       const enhancedBooths = updatedBooths.map((booth, index) => ({
         ...booth,
-        congestionLevel: booth.congestionLevel || (['low', 'medium', 'high', 'very-high'] as const)[Math.floor(Math.random() * 4)],
-        waitingTime: booth.waitingTime ?? Math.floor(Math.random() * 30),
-        currentVisitors: booth.currentVisitors ?? Math.floor(Math.random() * 50),
-        maxCapacity: booth.maxCapacity || 50,
         popularityScore: booth.popularityScore ?? (Math.random() * 5),
         webcamUrl: booth.webcamUrl || (index % 2 === 0 ? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' : undefined),
         tags: booth.tags || ['축제', '한양대', 'ERICA', '2025']
@@ -198,27 +189,17 @@ export default function EnhancedKakaoMap() {
 
       const config = boothCategoryConfig[booth.category] || boothCategoryConfig.info;
 
-      // 혼잡도에 따른 색상 조정
-      const fillOpacity = booth.congestionLevel === 'very-high' ? 0.7 :
-                          booth.congestionLevel === 'high' ? 0.5 :
-                          booth.congestionLevel === 'medium' ? 0.4 : 0.3;
-
-      const strokeColor = booth.congestionLevel === 'very-high' ? '#EF4444' :
-                         booth.congestionLevel === 'high' ? '#F97316' :
-                         booth.congestionLevel === 'medium' ? '#EAB308' :
-                         config.strokeColor;
-
-      const polygonPath = booth.coordinates.map(coord => 
+      const polygonPath = booth.coordinates.map(coord =>
         new window.kakao.maps.LatLng(coord.lat, coord.lng)
       );
 
       const polygon = new window.kakao.maps.Polygon({
         path: polygonPath,
         strokeWeight: 3,
-        strokeColor: strokeColor,
+        strokeColor: config.strokeColor,
         strokeOpacity: 0.8,
         fillColor: config.fillColor,
-        fillOpacity: fillOpacity
+        fillOpacity: 0.3
       });
 
       polygon.setMap(map);
@@ -252,12 +233,9 @@ export default function EnhancedKakaoMap() {
       const overlayContent = document.createElement('div');
       overlayContent.innerHTML = `
         <div style="
-          background: ${booth.congestionLevel === 'very-high' ? '#DC2626' :
-                        booth.congestionLevel === 'high' ? '#EA580C' :
-                        booth.congestionLevel === 'medium' ? '#CA8A04' :
-                        'white'};
-          color: ${booth.congestionLevel ? 'white' : 'black'};
-          border: 1.5px solid ${strokeColor};
+          background: rgba(255,255,255,0.92);
+          color: black;
+          border: 1.5px solid ${config.strokeColor};
           border-radius: ${6 * overlaySettings.scale}px;
           padding: ${overlaySettings.paddingY}px ${overlaySettings.paddingX}px;
           font-size: ${overlaySettings.fontSize}px;
@@ -268,9 +246,6 @@ export default function EnhancedKakaoMap() {
           justify-content: center;
           gap: ${2 * overlaySettings.scale}px;
           backdrop-filter: blur(4px);
-          background: ${booth.congestionLevel ?
-            `linear-gradient(135deg, ${strokeColor}DD, ${strokeColor}AA)` :
-            'rgba(255,255,255,0.92)'};
           cursor: pointer;
           transition: transform 0.2s, box-shadow 0.2s;
           transform: scale(${overlaySettings.scale});
@@ -292,7 +267,7 @@ export default function EnhancedKakaoMap() {
         content: overlayContent,
         yAnchor: 0.5,
         xAnchor: 0.5,
-        zIndex: booth.congestionLevel === 'very-high' ? 10 : 5,
+        zIndex: 5,
         clickable: true
       });
 

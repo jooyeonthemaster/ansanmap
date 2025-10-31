@@ -314,9 +314,11 @@ export default function AdminPage() {
 
   // 부스가 이미 할당되었는지 확인 (좌표가 있어야 할당된 것으로 간주)
   const isBoothAssigned = (boothNumber: string) => {
-    return booths.some(booth =>
-      booth.name.includes(boothNumber) && booth.coordinates.length > 0
-    );
+    return booths.some(booth => {
+      // 부스 이름에서 부스 번호 추출 ("S1 - 프로그램명" → "S1")
+      const extractedBoothNumber = booth.name.split(' - ')[0].trim();
+      return extractedBoothNumber === boothNumber && booth.coordinates.length > 0;
+    });
   };
 
   // 할당된 부스 개수 계산
