@@ -102,6 +102,7 @@ export async function addFestivalBooth(
     // 정렬 순서 계산
     const sortOrder = extractSortOrder(boothData.booth_number);
 
+    // 1. festival_booths 테이블에 추가
     const { data, error } = await supabase
       .from('festival_booths')
       .insert({
@@ -116,6 +117,29 @@ export async function addFestivalBooth(
       return {
         success: false,
         message: '부스 추가에 실패했습니다.',
+      };
+    }
+
+    // 2. booths 테이블에도 추가 (지도에 표시되도록)
+    const { error: boothsError } = await supabase
+      .from('booths')
+      .insert({
+        name: boothData.program_name,
+        category: 'activity', // 축제 부스는 모두 activity 카테고리
+        description: boothData.organization,
+        booth_number: boothData.booth_number,
+        coordinates: [], // 초기에는 빈 좌표 (관리자가 나중에 지도에서 설정)
+        operating_hours: '축제 기간 중 운영',
+        is_active: true,
+      });
+
+    if (boothsError) {
+      console.error('Error adding to booths table:', boothsError);
+      // festival_booths는 추가되었으므로 경고만 표시
+      return {
+        success: true,
+        message: '부스가 추가되었습니다. (지도 연동은 수동 설정 필요)',
+        data,
       };
     }
 
@@ -164,6 +188,7 @@ export async function updateFestivalBooth(
       ? extractSortOrder(updates.booth_number)
       : undefined;
 
+    // 1. festival_booths 테이블 업데이트
     const { error } = await supabase
       .from('festival_booths')
       .update({
@@ -178,6 +203,24 @@ export async function updateFestivalBooth(
         success: false,
         message: '부스 수정에 실패했습니다.',
       };
+    }
+
+    // 2. booths 테이블도 업데이트
+    const boothUpdates: Record<string, string> = {};
+    if (updates.program_name) boothUpdates.name = updates.program_name;
+    if (updates.organization) boothUpdates.description = updates.organization;
+    if (updates.booth_number) boothUpdates.booth_number = updates.booth_number;
+
+    if (Object.keys(boothUpdates).length > 0) {
+      const { error: boothsError } = await supabase
+        .from('booths')
+        .update(boothUpdates)
+        .eq('booth_number', oldBoothNumber);
+
+      if (boothsError) {
+        console.error('Error updating booths table:', boothsError);
+        // festival_booths는 수정되었으므로 경고만 표시
+      }
     }
 
     return {
@@ -198,6 +241,7 @@ export async function deleteFestivalBooth(
   boothNumber: string
 ): Promise<{ success: boolean; message: string }> {
   try {
+    // 1. festival_booths 테이블에서 삭제
     const { error } = await supabase
       .from('festival_booths')
       .delete()
@@ -209,6 +253,17 @@ export async function deleteFestivalBooth(
         success: false,
         message: '부스 삭제에 실패했습니다.',
       };
+    }
+
+    // 2. booths 테이블에서도 삭제
+    const { error: boothsError } = await supabase
+      .from('booths')
+      .delete()
+      .eq('booth_number', boothNumber);
+
+    if (boothsError) {
+      console.error('Error deleting from booths table:', boothsError);
+      // festival_booths는 삭제되었으므로 경고만 표시
     }
 
     return {

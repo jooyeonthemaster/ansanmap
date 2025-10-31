@@ -69,12 +69,36 @@ export default function AdminPage() {
 
   const loadFestivalData = async () => {
     try {
-      const response = await fetch('/api/festival-data');
-      if (!response.ok) {
-        throw new Error('Failed to fetch festival data');
+      // Supabase에서 festival_booths 데이터 가져오기
+      const { data: festivalBooths, error } = await (await import('@/lib/supabase/client')).supabase
+        .from('festival_booths')
+        .select('*')
+        .order('zone_key', { ascending: true })
+        .order('sort_order', { ascending: true });
+
+      if (error) {
+        throw new Error(`Failed to fetch festival data: ${error.message}`);
       }
-      const data: ASVFestival2025 = await response.json();
-      setFestivalData(data);
+
+      // ASVFestival2025 형식으로 변환
+      const zones: Record<string, ZoneData> = {};
+
+      festivalBooths?.forEach((booth: { booth_number: string; program_name: string; organization: string; zone_key: string; zone_name: string; zone_theme: string | null }) => {
+        if (!zones[booth.zone_key]) {
+          zones[booth.zone_key] = {
+            name: booth.zone_name,
+            theme: booth.zone_theme || undefined,
+            booths: []
+          };
+        }
+        zones[booth.zone_key].booths?.push({
+          boothNumber: booth.booth_number,
+          programName: booth.program_name,
+          organization: booth.organization
+        });
+      });
+
+      setFestivalData({ zones });
     } catch (error) {
       console.error('Festival data loading error:', error);
       toast.error('축제 데이터를 불러오는데 실패했습니다.');
@@ -288,9 +312,11 @@ export default function AdminPage() {
     );
   }
 
-  // 부스가 이미 할당되었는지 확인
+  // 부스가 이미 할당되었는지 확인 (좌표가 있어야 할당된 것으로 간주)
   const isBoothAssigned = (boothNumber: string) => {
-    return booths.some(booth => booth.name.includes(boothNumber));
+    return booths.some(booth =>
+      booth.name.includes(boothNumber) && booth.coordinates.length > 0
+    );
   };
 
   // 할당된 부스 개수 계산
