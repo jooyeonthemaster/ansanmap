@@ -21,7 +21,10 @@
       "Bash(awk:*)",
       "Bash(curl:*)",
       "Bash(npx tsc --noEmit)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git push:*)",
+      "Bash(if not exist \"app\\admin\\login\" mkdir \"app\\admin\\login\")",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

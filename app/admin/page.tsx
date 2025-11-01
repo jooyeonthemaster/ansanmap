@@ -32,6 +32,7 @@ interface ASVFestival2025 {
 export default function AdminPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'booths' | 'announcements' | 'messages' | 'festival' | 'festivalInfo'>('booths');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [booths, setBooths] = useState<Booth[]>([]);
   const [festivalData, setFestivalData] = useState<ASVFestival2025 | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -220,6 +221,29 @@ export default function AdminPage() {
     });
     setSelectedCoordinates([]);
     setEditingBoothId(null);
+  };
+
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까?')) return;
+
+    setIsLoggingOut(true);
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+
+      if (response.ok) {
+        toast.success('로그아웃 되었습니다.');
+        router.push('/admin/login');
+        router.refresh();
+      } else {
+        toast.error('로그아웃 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('로그아웃 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   // JSON 부스 선택 핸들러
@@ -516,12 +540,21 @@ export default function AdminPage() {
       <div className="bg-white border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-xl font-bold">관리자 페이지</h1>
-          <button
-            onClick={() => router.push('/')}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-          >
-            ← 사용자 화면으로
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/')}
+              className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+            >
+              ← 사용자 화면
+            </button>
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+            >
+              {isLoggingOut ? '로그아웃 중...' : '로그아웃'}
+            </button>
+          </div>
         </div>
 
         {/* 탭 메뉴 - PC 반응형 */}
